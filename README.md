@@ -5,7 +5,7 @@
 ## License
 
 2026- (c) Ayasaka-Koto.  
-This is released under the MIT License](./LICENSE).
+This is released under [the MIT License](./LICENSE).
 
 ## How to Use
 
