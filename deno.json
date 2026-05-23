@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-run ./exec.ts",
+    "compile": "deno run --allow-run --allow-read --allow-write scripts/compile-all.ts"
+  },
+  "imports": {
+    "@std/fmt": "jsr:@std/fmt@1.0.10",
+    "@std/path": "jsr:@std/path@1.1.0",
+    "@std/semver": "jsr:@std/semver@1.0.5"
+  }
+}

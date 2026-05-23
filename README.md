@@ -12,46 +12,67 @@ This is released under [the MIT License](./LICENSE).
 Denoを用意したうえでこのリポジトリをクローンし、リポジトリルートで以下を実行します。
 
 ```sh
-deno run ./exec.ts --allow-net --allow-write --allow-run
+deno run ./exec.ts --allow-net --allow-read --allow-run
+```
+
+または:
+
+```sh
+deno task start
 ```
 
 上記コマンドを実行すると、コピペのためのウィザードがCLIとして起動します。
 ウィザード内で問われる質問は以下のとおりです。
 
 1. `version: ` (短文自由入力)
-    - どのバージョンのAyaExpTech Arcaneからコピペするかを指定します。
-    - `1.0.0`のように、`v`などはつけずにバージョン番号を入力します。
-    - 入力せず次に進むこともできます。この場合は最新の安定リリースバージョンが参照されます。
+    - どのバージョンの [AyaExpTech Arcane](https://github.com/AXT-Studio/Arcane)（[`jsr:@ayaexptech/arcane`](https://jsr.io/@ayaexptech/arcane)）からコピペするかを指定します。
+    - `1.0.0-alpha.3` のように、`v` などはつけずにバージョン番号を入力します。
+    - 入力せず次に進むこともできます。この場合は JSR 上の最新安定版（`latest`）を参照します。安定版が未公開のときは、公開済みバージョンのうち最も新しいものがヒントとして表示されます。
 2. `imports: ` (チェックボックス 複数選択可)
-    - AyaExpTech Arcaneが提供しているモジュール・クラスのうち、どれをコピペするかを指定します。
-    - 選択肢は以下のとおりです。
-        - `BinaryHeap`
-        - `BinaryHeapLite`
-        - `BinarySearch`
-        - `Combination`
-        - `Deque`
-        - `DisjointSet`
-        - `ExtendedMath`
-        - `Iteration`
-        - `LazySegmentTree`
-        - `LinearSieve`
-        - `MaxFlow`
-        - `ModOps`
-        - `SegmentTree`
-        - `StringOperations `
-        - `Treap`
-        - `UniqueID`
-        - `Vector2D`
+    - AyaExpTech Arcane が提供しているモジュール・クラスのうち、どれをコピペするかを指定します。
+    - 選択肢は、指定（または解決）したバージョンの `mod.ts` から **自動取得** され、辞書順に表示されます。
     - 複数選択も可能です。また、1つ以上選択する必要があります。
 
-上記のすべての質問に回答し終わると、クリップボードに(2)で選択したすべてのモジュールのコードがコピーされ、実行が終了します。
+上記のすべての質問に回答し終わると、クリップボードに (2) で選択したすべてのモジュールの TypeScript ソース（依存分を含む）がコピーされ、実行が終了します。
 
 > [!NOTE]
-> (2)で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のモジュール・クラスも含めたコードがコピーされます。
+> (2) で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のモジュール・クラスも含めたコードがコピーされます。
 >
-> 例: `ModOps`をimportすると、選択されていなくても自動的に`ExtendedMath`のコードもコピーされます。
+> 例: `ModOps` を選ぶと、選択されていなくても自動的に `ExtendedMath` のコードもコピーされます。
 
 なお、以下のような場合はクリップボードへのコピーは行われず、エラーメッセージを出したうえで実行が異常終了します。
 
-- (1)で指定したバージョンがAyaExpTech Arcaneに存在しない
-- 指定されたバージョンは存在するが、(2)で指定されたバージョンでは(まだ)存在しないモジュール・クラスを指定している
+- (1) で指定したバージョンが AyaExpTech Arcane に存在しない
+
+## Building standalone binaries
+
+Deno が入っている環境で、macOS (Apple Silicon)・Windows・Linux 向けのバイナリをまとめてビルドできます。
+
+```sh
+deno task compile
+```
+
+成果物は `dist/` に出力されます。
+
+| ファイル | 対象 |
+|----------|------|
+| `dist/axt-arcane-bundler-aarch64-apple-darwin` | macOS (Apple Silicon) |
+| `dist/axt-arcane-bundler-x86_64-pc-windows-msvc.exe` | Windows (x86_64) |
+| `dist/axt-arcane-bundler-x86_64-unknown-linux-gnu` | Linux (x86_64) |
+
+実行例:
+
+```sh
+# macOS
+./dist/axt-arcane-bundler-aarch64-apple-darwin
+
+# Linux
+./dist/axt-arcane-bundler-x86_64-unknown-linux-gnu
+
+# Windows (PowerShell)
+.\dist\axt-arcane-bundler-x86_64-pc-windows-msvc.exe
+```
+
+ビルド時に `--allow-net`・`--allow-read`・`--allow-run` がバイナリへ埋め込まれるため、実行時に権限フラグは不要です。実行時も JSR からソースを取得するため、ネットワーク接続が必要です。
+
+クリップボード連携: macOS は `pbcopy`、Windows は `clip`、Linux は `wl-copy` / `xclip` / `xsel`（いずれかが PATH にある場合）を使用します。
