@@ -2,6 +2,10 @@
 
 綾坂ことがAyaExpTech名義で制作しているTypeScriptライブラリ「AyaExpTech Arcane」を適切にコピペするためのツールです。
 
+> AyaExpTech Arcane
+> - GitHub: https://github.com/AXT-Studio/Arcane
+> - JSR: https://jsr.io/@ayaexptech/arcane
+
 ## License
 
 2026- (c) Ayasaka-Koto.  
