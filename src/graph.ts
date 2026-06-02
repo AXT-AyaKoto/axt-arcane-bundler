@@ -1,5 +1,6 @@
 import { ARCANE_NAME, ARCANE_SCOPE, jsrFileUrl } from "./constants.ts";
 import { fetchExportMap } from "./exports.ts";
+import { normalizePackagePath } from "./path.ts";
 import type { WizardSelection } from "./wizard.ts";
 
 interface ModuleGraphDependency {
@@ -16,11 +17,6 @@ type ModuleGraph2 = Record<string, ModuleGraphEntry>;
 
 function versionMetaUrl(version: string): string {
   return `https://jsr.io/@${ARCANE_SCOPE}/${ARCANE_NAME}/${version}_meta.json`;
-}
-
-function normalizePackagePath(modulePath: string): string {
-  const stripped = modulePath.replace(/^\.\//, "");
-  return stripped.startsWith("/") ? stripped : `/${stripped}`;
 }
 
 function resolveRelativePath(fromPath: string, specifier: string): string {

@@ -1,4 +1,5 @@
 import { FALLBACK_EXPORTS, jsrModUrl } from "./constants.ts";
+import { normalizePackagePath } from "./path.ts";
 
 const EXPORT_LINE_RE =
   /export\s*\{\s*([^}]+)\s*\}\s*from\s*["']([^"']+)["']\s*;?/g;
@@ -46,9 +47,9 @@ export async function listExportNames(
   }
 }
 
-export async function fetchExportMap(
+export async function fetchModExportEntries(
   version: string,
-): Promise<Map<string, string>> {
+): Promise<ExportEntry[]> {
   const url = jsrModUrl(version);
   const response = await fetch(url);
   if (!response.ok) {
@@ -57,9 +58,39 @@ export async function fetchExportMap(
     );
   }
   const source = await response.text();
+  return parseModExports(source);
+}
+
+export async function fetchExportMap(
+  version: string,
+): Promise<Map<string, string>> {
+  const entries = await fetchModExportEntries(version);
   const map = new Map<string, string>();
-  for (const { name, modulePath } of parseModExports(source)) {
+  for (const { name, modulePath } of entries) {
     map.set(name, modulePath);
   }
   return map;
+}
+
+export function buildExportsByPath(
+  entries: ExportEntry[],
+): Map<string, string[]> {
+  const byPath = new Map<string, string[]>();
+  for (const { name, modulePath } of entries) {
+    const path = normalizePackagePath(modulePath);
+    const list = byPath.get(path) ?? [];
+    list.push(name);
+    byPath.set(path, list);
+  }
+  for (const [path, names] of byPath) {
+    byPath.set(path, [...new Set(names)].sort((a, b) => a.localeCompare(b)));
+  }
+  return byPath;
+}
+
+export async function fetchExportsByPath(
+  version: string,
+): Promise<Map<string, string[]>> {
+  const entries = await fetchModExportEntries(version);
+  return buildExportsByPath(entries);
 }

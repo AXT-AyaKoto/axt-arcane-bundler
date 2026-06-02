@@ -2,6 +2,7 @@ const COMPILE_PERMISSIONS = [
   "--allow-net",
   "--allow-read",
   "--allow-run",
+  "--allow-env",
 ] as const;
 
 const TARGETS = [

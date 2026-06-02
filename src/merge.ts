@@ -1,17 +1,18 @@
-import { jsrFileUrl } from "./constants.ts";
+import {
+  extractFromFile,
+  exportsToExtractForFile,
+} from "./extract.ts";
 
-const RELATIVE_IMPORT_LINE_RE =
-  /^\s*import\s+(?:type\s+)?[\s\w*{},\n]+\s+from\s+["']\.\/[^"']+["']\s*;?\s*$/gm;
-
-/** Arcane source section banners (`// ===...`, `// Imports`, etc.). */
-const ARCANE_SECTION_BLOCK_RE =
-  /^\/\/ ={64}\n(?:^\/\/ .+\n)+^\/\/ ={64}\n/gm;
+export function normalizeBlankLines(text: string): string {
+  return text.replace(/\n{3,}/g, "\n\n");
+}
 
 export async function mergeTypeScriptSources(
   fetchVersion: string,
   packagePaths: string[],
   selectedExports: string[],
   specifier: string,
+  exportsByPath: Map<string, string[]>,
 ): Promise<string> {
   const parts: string[] = [
     "// ======== Bundled from AyaExpTech Arcane ========",
@@ -22,21 +23,25 @@ export async function mergeTypeScriptSources(
   ];
 
   for (const pkgPath of packagePaths) {
-    const url = jsrFileUrl(fetchVersion, pkgPath);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);
-    }
-    let source = await response.text();
-    source = source.replace(RELATIVE_IMPORT_LINE_RE, "");
-    source = source.replace(ARCANE_SECTION_BLOCK_RE, "");
-    source = source.replace(/\n{3,}/g, "\n\n").trimEnd();
+    const namesToExtract = exportsToExtractForFile(
+      pkgPath,
+      selectedExports,
+      exportsByPath,
+    );
+    if (namesToExtract.size === 0) continue;
 
-    const label = pkgPath.replace(/^\//, "");
-    parts.push(`// --- ${label} ---`, "", source, "");
+    const chunk = await extractFromFile(
+      fetchVersion,
+      pkgPath,
+      namesToExtract,
+    );
+    if (chunk.length > 0) {
+      parts.push(chunk, "");
+    }
   }
 
   parts.push("// ======== Bundled from AyaExpTech Arcane (End) ========");
 
-  return parts.join("\n").trimEnd() + "\n";
+  const merged = parts.join("\n").trimEnd() + "\n";
+  return normalizeBlankLines(merged);
 }

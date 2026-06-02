@@ -1,11 +1,14 @@
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-read --allow-run ./exec.ts",
+    "start": "deno run --allow-net --allow-read --allow-run --allow-env ./exec.ts",
+    "test": "deno test --allow-read --allow-env",
     "compile": "deno run --allow-run --allow-read --allow-write scripts/compile-all.ts"
   },
   "imports": {
+    "@std/assert": "jsr:@std/assert@1.0.19",
     "@std/fmt": "jsr:@std/fmt@1.0.10",
     "@std/path": "jsr:@std/path@1.1.0",
-    "@std/semver": "jsr:@std/semver@1.0.5"
+    "@std/semver": "jsr:@std/semver@1.0.5",
+    "typescript": "npm:typescript@5.8.3"
   }
 }

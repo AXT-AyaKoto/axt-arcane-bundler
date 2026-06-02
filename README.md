@@ -16,7 +16,7 @@ This is released under [the MIT License](./LICENSE).
 Denoを用意したうえでこのリポジトリをクローンし、リポジトリルートで以下を実行します。
 
 ```sh
-deno run ./exec.ts --allow-net --allow-read --allow-run
+deno run ./exec.ts --allow-net --allow-read --allow-run --allow-env
 ```
 
 または:
@@ -37,12 +37,12 @@ deno task start
     - 選択肢は、指定（または解決）したバージョンの `mod.ts` から **自動取得** され、辞書順に表示されます。
     - 複数選択も可能です。また、1つ以上選択する必要があります。
 
-上記のすべての質問に回答し終わると、クリップボードに (2) で選択したすべてのモジュールの TypeScript ソース（依存分を含む）がコピーされ、実行が終了します。
+上記のすべての質問に回答し終わると、クリップボードに (2) で選択した export の TypeScript ソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、`export` キーワードは付きません（JSDoc は保持されます）。
 
 > [!NOTE]
-> (2) で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のモジュール・クラスも含めたコードがコピーされます。
+> (2) で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のコードも自動的に含まれます（例: `ModOps` を選ぶと `ExtendedMath` も含まれる）。
 >
-> 例: `ModOps` を選ぶと、選択されていなくても自動的に `ExtendedMath` のコードもコピーされます。
+> 同一ソースファイルに複数の export がある場合、選択した export のみが含まれます（例: `BinaryHeap` のみを選んだとき `BinaryHeapLite` は含まれません）。
 
 なお、以下のような場合はクリップボードへのコピーは行われず、エラーメッセージを出したうえで実行が異常終了します。
 
@@ -77,6 +77,8 @@ deno task compile
 .\dist\axt-arcane-bundler-x86_64-pc-windows-msvc.exe
 ```
 
-ビルド時に `--allow-net`・`--allow-read`・`--allow-run` がバイナリへ埋め込まれるため、実行時に権限フラグは不要です。実行時も JSR からソースを取得するため、ネットワーク接続が必要です。
+ビルド時に `--allow-net`・`--allow-read`・`--allow-run`・`--allow-env` がバイナリへ埋め込まれるため、実行時に権限フラグは不要です。実行時も JSR からソースを取得するため、ネットワーク接続が必要です。
+
+テストは `deno task test` で実行できます。
 
 クリップボード連携: macOS は `pbcopy`、Windows は `clip`、Linux は `wl-copy` / `xclip` / `xsel`（いずれかが PATH にある場合）を使用します。
