@@ -25,7 +25,7 @@ deno run -A jsr:@axt-ayakoto/axt-arcane-bundler
 ```
 
 > [!TIP]
-> 実行バージョンを固定したい場合は、以下のコマンドを使用することができます。
+> 実行バージョンを固定したい場合は、以下のようなコマンドを使用することができます。
 > ```sh
 > deno run -A jsr:@axt-ayakoto/axt-arcane-bundler@1.0.0
 > ```
