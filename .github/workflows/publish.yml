@@ -1,0 +1,94 @@
+name: Publish to JSR
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name that starts with v (example: v1.0.0-alpha.1)"
+        required: true
+        type: string
+      dry_run:
+        description: "Run deno publish with --dry-run"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+
+      - name: Resolve TAG_NAME and SEMVER
+        id: resolve_version
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_TAG_NAME: ${{ inputs.tag_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TAG_NAME="$INPUT_TAG_NAME"
+          else
+            TAG_NAME="$REF_NAME"
+          fi
+
+          if [[ ! "$TAG_NAME" =~ ^v ]]; then
+            echo "TAG_NAME must start with 'v': $TAG_NAME"
+            exit 1
+          fi
+
+          SEMVER="${TAG_NAME#v}"
+
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+          echo "SEMVER=$SEMVER" >> "$GITHUB_ENV"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "semver=$SEMVER" >> "$GITHUB_OUTPUT"
+
+          echo "TAG_NAME=$TAG_NAME"
+          echo "SEMVER=$SEMVER"
+
+      - name: Update jsr.json version from tag
+        uses: maks11060/deno-publish-version@v2
+        with:
+          config-file: jsr.json
+          tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
+
+      - name: Commit updated jsr.json locally
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "AXT-AyaKoto"
+          git config user.email "148830788+AXT-AyaKoto@users.noreply.github.com"
+
+          git add jsr.json
+
+          if git diff --cached --quiet; then
+            echo "No staged changes in jsr.json; skipping local commit."
+          else
+            git commit -m "chore(ci): sync jsr version to $SEMVER for publish"
+            echo "Created local commit to keep worktree clean."
+            git --no-pager log -1 --oneline
+          fi
+
+      - name: Publish package to JSR
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+        run: deno publish --config jsr.json
+
+      - name: Publish package to JSR (dry-run)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: deno publish --config jsr.json --dry-run

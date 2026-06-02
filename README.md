@@ -6,6 +6,9 @@
 > - GitHub: https://github.com/AXT-Studio/Arcane
 > - JSR: https://jsr.io/@ayaexptech/arcane
 
+> このツール (axt-arcane-bundler)
+> - JSR: https://jsr.io/@axt-ayakoto/axt-arcane-bundler
+
 ## License
 
 2026- (c) Ayasaka-Koto.  
@@ -13,17 +16,33 @@ This is released under [the MIT License](./LICENSE).
 
 ## How to Use
 
-Denoを用意したうえでこのリポジトリをクローンし、リポジトリルートで以下を実行します。
+### JSRから直接利用する (推奨)
+
+事前にDenoをインストールしたうえで、以下のコマンドでウィザードを起動します。
+
+```sh
+deno run -A jsr:@axt-ayakoto/axt-arcane-bundler
+```
+
+> [!TIP]
+> 実行バージョンを固定したい場合は、以下のコマンドを使用することができます。
+> ```sh
+> deno run -A jsr:@axt-ayakoto/axt-arcane-bundler@1.0.0
+> ```
+
+### リポジトリをクローンして利用する (開発用)
+
+事前にDenoをインストールし、リポジトリをクローンしたうえで、以下のいずれかのコマンドでウィザードを起動します。
 
 ```sh
 deno run ./exec.ts --allow-net --allow-read --allow-run --allow-env
 ```
 
-または:
-
 ```sh
 deno task start
 ```
+
+### ウィザードの使用方法
 
 上記コマンドを実行すると、コピペのためのウィザードがCLIとして起動します。
 ウィザード内で問われる質問は以下のとおりです。
@@ -82,3 +101,15 @@ deno task compile
 テストは `deno task test` で実行できます。
 
 クリップボード連携: macOS は `pbcopy`、Windows は `clip`、Linux は `wl-copy` / `xclip` / `xsel`（いずれかが PATH にある場合）を使用します。
+
+## Releasing
+
+JSR への公開は GitHub Actions で行います。初回のみ、[JSR のパッケージ設定](https://jsr.io/@axt-ayakoto/axt-arcane-bundler/settings) でこの GitHub リポジトリを Link してください。
+
+1. 変更を `main` に merge する
+2. GitHub で Release を作成し **新規** の `vX.Y.Z` タグを付ける、または `git tag vX.Y.Z && git push origin vX.Y.Z` する
+3. [Publish to JSR](.github/workflows/publish.yml) ワークフローが走り、[JSR](https://jsr.io/@axt-ayakoto/axt-arcane-bundler) に反映される
+
+リリース前の手動確認: GitHub Actions → **Publish to JSR** → **Run workflow** → `tag_name` に例 `v0.1.0`、`dry_run` をオンにして実行する。
+
+リポジトリ上の [`jsr.json`](jsr.json) の `version` は常に `0.0.0` のままです。CI がタグから semver を読み取り、publish 時だけ差し替えます。
