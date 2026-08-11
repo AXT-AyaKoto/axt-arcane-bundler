@@ -62,15 +62,16 @@ function collectIntraFileDeps(
   sf: ts.SourceFile,
   checker: ts.TypeChecker,
   rootNodes: ts.Node[],
+  rootNames: Set<string>,
 ): Set<string> {
   const tops = getTopLevelDecls(sf);
   const topByName = new Map(tops.map((d) => [d.name, d]));
   const needed = new Set<string>();
 
   function addDeclByName(name: string): void {
-    if (needed.has(name)) return;
+    if (needed.has(name) || rootNames.has(name)) return;
     const decl = topByName.get(name);
-    if (!decl || decl.isExport) return;
+    if (!decl) return;
     needed.add(name);
     visit(decl.node);
   }
@@ -87,7 +88,7 @@ function collectIntraFileDeps(
     }
     if (!cur || cur.parent !== sf) return;
     const info = tops.find((t) => t.node === cur);
-    if (info && !info.isExport) {
+    if (info) {
       addDeclByName(info.name);
     }
   }
@@ -166,20 +167,17 @@ export function extractFromSource(
   const exportRoots = tops.filter((t) =>
     t.isExport && namesToExtract.has(t.name)
   );
-  const privateNeeded = collectIntraFileDeps(
+  const depNeeded = collectIntraFileDeps(
     sf,
     checker,
     exportRoots.map((r) => r.node),
+    namesToExtract,
   );
 
+  // Emit in source order: intra-file deps (private or exported) then selected exports.
   const parts: string[] = [];
   for (const t of tops) {
-    if (!t.isExport && privateNeeded.has(t.name)) {
-      parts.push(sliceDeclaration(sf, t.node));
-    }
-  }
-  for (const t of tops) {
-    if (t.isExport && namesToExtract.has(t.name)) {
+    if (depNeeded.has(t.name) || (t.isExport && namesToExtract.has(t.name))) {
       parts.push(sliceDeclaration(sf, t.node));
     }
   }
