@@ -77,6 +77,87 @@ Deno.test("extractFromSource includes non-export intra-file dependencies", () =>
   assertStringIncludes(out, "class Worker");
 });
 
+const WITH_EXPORTED_TYPE_DEP = `export type CSRGraph = {
+  head: Uint32Array;
+  to: Uint32Array;
+};
+
+export class DirectedGraph {
+  toCSR(): CSRGraph {
+    return { head: new Uint32Array(), to: new Uint32Array() };
+  }
+}
+
+export class UndirectedGraph {
+  toCSR(): CSRGraph {
+    return { head: new Uint32Array(), to: new Uint32Array() };
+  }
+}
+`;
+
+const WITH_NESTED_EXPORTED_TYPES = `export type Edge = { to: number };
+
+export type CSRGraph = { edges: Edge[] };
+
+export class DirectedGraph {
+  toCSR(): CSRGraph {
+    return { edges: [] };
+  }
+}
+`;
+
+const WITH_EXPORTED_INTERFACE_DEP = `export interface Node {
+  id: number;
+}
+
+export class Graph {
+  get(id: number): Node {
+    return { id };
+  }
+}
+`;
+
+Deno.test("extractFromSource includes exported type deps used by selected export", () => {
+  const out = extractFromSource(
+    WITH_EXPORTED_TYPE_DEP,
+    "graphs.ts",
+    new Set(["DirectedGraph"]),
+  );
+  assertStringIncludes(out, "type CSRGraph");
+  assertStringIncludes(out, "class DirectedGraph");
+  assertFalse(out.includes("class UndirectedGraph"));
+  assertFalse(out.includes("export type"));
+  assertFalse(out.includes("export class"));
+});
+
+Deno.test("extractFromSource includes nested exported type deps", () => {
+  const out = extractFromSource(
+    WITH_NESTED_EXPORTED_TYPES,
+    "graphs.ts",
+    new Set(["DirectedGraph"]),
+  );
+  assertStringIncludes(out, "type Edge");
+  assertStringIncludes(out, "type CSRGraph");
+  assertStringIncludes(out, "class DirectedGraph");
+  // Source order: Edge, CSRGraph, DirectedGraph
+  assertEquals(out.indexOf("type Edge") < out.indexOf("type CSRGraph"), true);
+  assertEquals(
+    out.indexOf("type CSRGraph") < out.indexOf("class DirectedGraph"),
+    true,
+  );
+});
+
+Deno.test("extractFromSource includes exported interface deps", () => {
+  const out = extractFromSource(
+    WITH_EXPORTED_INTERFACE_DEP,
+    "graph.ts",
+    new Set(["Graph"]),
+  );
+  assertStringIncludes(out, "interface Node");
+  assertStringIncludes(out, "class Graph");
+  assertFalse(out.includes("export "));
+});
+
 Deno.test("extractFromSource preserves JSDoc and omits section banners", () => {
   const out = extractFromSource(WITH_BANNER, "doc.ts", new Set(["Documented"]));
   assertEquals(out.trimStart().startsWith("/**"), true);
