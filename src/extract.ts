@@ -1,5 +1,6 @@
 import ts from "typescript";
 import { jsrFileUrl } from "./constants.ts";
+import { resolveRelativePath } from "./path.ts";
 
 export interface TopLevelDecl {
   name: string;
@@ -7,19 +8,71 @@ export interface TopLevelDecl {
   isExport: boolean;
 }
 
-export function exportsToExtractForFile(
-  packagePath: string,
+function seedSelectedExports(
   selectedExports: string[],
   exportsByPath: Map<string, string[]>,
-): Set<string> {
-  const fileExports = exportsByPath.get(packagePath) ?? [];
-  const selectedInFile = selectedExports.filter((name) =>
-    fileExports.includes(name)
-  );
-  if (selectedInFile.length > 0) {
-    return new Set(selectedInFile);
+): Map<string, Set<string>> {
+  const selected = new Set(selectedExports);
+  const needed = new Map<string, Set<string>>();
+  for (const [packagePath, names] of exportsByPath) {
+    for (const name of names) {
+      if (!selected.has(name)) continue;
+      const set = needed.get(packagePath) ?? new Set<string>();
+      set.add(name);
+      needed.set(packagePath, set);
+    }
   }
-  return new Set(fileExports);
+  return needed;
+}
+
+/**
+ * For each file, the export names that must be kept: selected exports plus
+ * named relative imports actually referenced by those exports (and their
+ * intra-file deps).
+ */
+export function resolveExportsToExtract(
+  sources: Map<string, string>,
+  selectedExports: string[],
+  exportsByPath: Map<string, string[]>,
+): Map<string, Set<string>> {
+  const needed = seedSelectedExports(selectedExports, exportsByPath);
+  const analyzed = new Map<string, Set<string>>();
+  const queue = [...needed.keys()];
+
+  while (queue.length > 0) {
+    const packagePath = queue.pop()!;
+    const names = needed.get(packagePath);
+    const source = sources.get(packagePath);
+    if (!names || names.size === 0 || source == null) continue;
+
+    const prev = analyzed.get(packagePath);
+    if (prev && names.size === prev.size && [...names].every((n) => prev.has(n))) {
+      continue;
+    }
+    analyzed.set(packagePath, new Set(names));
+
+    const fileName = packagePath.replace(/^\//, "").split("/").pop() ??
+      "module.ts";
+    const { usedImports } = analyzeSource(source, fileName, names, packagePath);
+
+    for (const [fromPath, importNames] of usedImports) {
+      if (!sources.has(fromPath)) continue;
+      let set = needed.get(fromPath);
+      if (!set) {
+        set = new Set<string>();
+        needed.set(fromPath, set);
+      }
+      let added = false;
+      for (const name of importNames) {
+        if (set.has(name)) continue;
+        set.add(name);
+        added = true;
+      }
+      if (added) queue.push(fromPath);
+    }
+  }
+
+  return needed;
 }
 
 export function getTopLevelDecls(sf: ts.SourceFile): TopLevelDecl[] {
@@ -58,15 +111,57 @@ export function getTopLevelDecls(sf: ts.SourceFile): TopLevelDecl[] {
   return out;
 }
 
+function importDeclarationOf(
+  node: ts.Node | undefined,
+): ts.ImportDeclaration | undefined {
+  let cur: ts.Node | undefined = node;
+  while (cur) {
+    if (ts.isImportDeclaration(cur)) return cur;
+    cur = cur.parent;
+  }
+  return undefined;
+}
+
+function importSpecifierOf(node: ts.Node | undefined): ts.ImportSpecifier | undefined {
+  let cur: ts.Node | undefined = node;
+  while (cur) {
+    if (ts.isImportSpecifier(cur)) return cur;
+    if (ts.isImportDeclaration(cur)) return undefined;
+    cur = cur.parent;
+  }
+  return undefined;
+}
+
+function recordNamedImport(
+  spec: ts.ImportSpecifier,
+  fromPackagePath: string,
+  usedImports: Map<string, Set<string>>,
+): void {
+  const importDecl = importDeclarationOf(spec);
+  if (!importDecl || !ts.isStringLiteral(importDecl.moduleSpecifier)) return;
+  const specifier = importDecl.moduleSpecifier.text;
+  if (!specifier.startsWith(".")) return;
+  const fromPath = resolveRelativePath(fromPackagePath, specifier);
+  const importedName = (spec.propertyName ?? spec.name).text;
+  let set = usedImports.get(fromPath);
+  if (!set) {
+    set = new Set<string>();
+    usedImports.set(fromPath, set);
+  }
+  set.add(importedName);
+}
+
 function collectIntraFileDeps(
   sf: ts.SourceFile,
   checker: ts.TypeChecker,
   rootNodes: ts.Node[],
   rootNames: Set<string>,
-): Set<string> {
+  fromPackagePath?: string,
+): { needed: Set<string>; usedImports: Map<string, Set<string>> } {
   const tops = getTopLevelDecls(sf);
   const topByName = new Map(tops.map((d) => [d.name, d]));
   const needed = new Set<string>();
+  const usedImports = new Map<string, Set<string>>();
 
   function addDeclByName(name: string): void {
     if (needed.has(name) || rootNames.has(name)) return;
@@ -80,6 +175,14 @@ function collectIntraFileDeps(
     ts.forEachChild(n, visit);
     if (!ts.isIdentifier(n)) return;
     const sym = checker.getSymbolAtLocation(n);
+
+    if (fromPackagePath && sym) {
+      for (const d of sym.declarations ?? []) {
+        const spec = importSpecifierOf(d);
+        if (spec) recordNamedImport(spec, fromPackagePath, usedImports);
+      }
+    }
+
     const valueDecl = sym?.valueDeclaration ?? sym?.declarations?.[0];
     if (!valueDecl) return;
     let cur: ts.Node | undefined = valueDecl;
@@ -96,7 +199,53 @@ function collectIntraFileDeps(
   for (const root of rootNodes) {
     visit(root);
   }
-  return needed;
+  return { needed, usedImports };
+}
+
+function analyzeSource(
+  source: string,
+  fileName: string,
+  namesToExtract: Set<string>,
+  fromPackagePath?: string,
+): {
+  sf: ts.SourceFile;
+  tops: TopLevelDecl[];
+  intraFile: Set<string>;
+  usedImports: Map<string, Set<string>>;
+} {
+  const sf = ts.createSourceFile(
+    fileName,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+
+  const host = ts.createCompilerHost({});
+  const origGet = host.getSourceFile.bind(host);
+  host.getSourceFile = (name, languageVersion) =>
+    name === fileName ? sf : origGet(name, languageVersion);
+
+  const program = ts.createProgram(
+    [fileName],
+    { target: ts.ScriptTarget.Latest },
+    host,
+  );
+  const checker = program.getTypeChecker();
+
+  const tops = getTopLevelDecls(sf);
+  const exportRoots = tops.filter((t) =>
+    t.isExport && namesToExtract.has(t.name)
+  );
+  const { needed: intraFile, usedImports } = collectIntraFileDeps(
+    sf,
+    checker,
+    exportRoots.map((r) => r.node),
+    namesToExtract,
+    fromPackagePath,
+  );
+
+  return { sf, tops, intraFile, usedImports };
 }
 
 function sliceStartWithJsDoc(sf: ts.SourceFile, node: ts.Node): number {
@@ -143,41 +292,16 @@ export function extractFromSource(
   fileName: string,
   namesToExtract: Set<string>,
 ): string {
-  const sf = ts.createSourceFile(
-    fileName,
+  const { sf, tops, intraFile } = analyzeSource(
     source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
-
-  const host = ts.createCompilerHost({});
-  const origGet = host.getSourceFile.bind(host);
-  host.getSourceFile = (name, languageVersion) =>
-    name === fileName ? sf : origGet(name, languageVersion);
-
-  const program = ts.createProgram(
-    [fileName],
-    { target: ts.ScriptTarget.Latest },
-    host,
-  );
-  const checker = program.getTypeChecker();
-
-  const tops = getTopLevelDecls(sf);
-  const exportRoots = tops.filter((t) =>
-    t.isExport && namesToExtract.has(t.name)
-  );
-  const depNeeded = collectIntraFileDeps(
-    sf,
-    checker,
-    exportRoots.map((r) => r.node),
+    fileName,
     namesToExtract,
   );
 
   // Emit in source order: intra-file deps (private or exported) then selected exports.
   const parts: string[] = [];
   for (const t of tops) {
-    if (depNeeded.has(t.name) || (t.isExport && namesToExtract.has(t.name))) {
+    if (intraFile.has(t.name) || (t.isExport && namesToExtract.has(t.name))) {
       parts.push(sliceDeclaration(sf, t.node));
     }
   }
@@ -185,17 +309,24 @@ export function extractFromSource(
   return parts.join("\n\n");
 }
 
-export async function extractFromFile(
+export async function fetchPackageSource(
   version: string,
   packagePath: string,
-  namesToExtract: Set<string>,
 ): Promise<string> {
   const url = jsrFileUrl(version, packagePath);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);
   }
-  const source = await response.text();
+  return response.text();
+}
+
+export async function extractFromFile(
+  version: string,
+  packagePath: string,
+  namesToExtract: Set<string>,
+): Promise<string> {
+  const source = await fetchPackageSource(version, packagePath);
   const fileName = packagePath.replace(/^\//, "").split("/").pop() ??
     "module.ts";
   return extractFromSource(source, fileName, namesToExtract);

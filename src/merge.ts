@@ -1,6 +1,7 @@
 import {
-  extractFromFile,
-  exportsToExtractForFile,
+  extractFromSource,
+  fetchPackageSource,
+  resolveExportsToExtract,
 } from "./extract.ts";
 
 export function normalizeBlankLines(text: string): string {
@@ -23,19 +24,25 @@ export async function mergeTypeScriptSources(
     "",
   ];
 
+  const sources = new Map<string, string>();
   for (const pkgPath of packagePaths) {
-    const namesToExtract = exportsToExtractForFile(
-      pkgPath,
-      selectedExports,
-      exportsByPath,
-    );
-    if (namesToExtract.size === 0) continue;
+    sources.set(pkgPath, await fetchPackageSource(fetchVersion, pkgPath));
+  }
 
-    const chunk = await extractFromFile(
-      fetchVersion,
-      pkgPath,
-      namesToExtract,
-    );
+  const namesByPath = resolveExportsToExtract(
+    sources,
+    selectedExports,
+    exportsByPath,
+  );
+
+  for (const pkgPath of packagePaths) {
+    const namesToExtract = namesByPath.get(pkgPath);
+    if (!namesToExtract || namesToExtract.size === 0) continue;
+
+    const source = sources.get(pkgPath);
+    if (source == null) continue;
+    const fileName = pkgPath.replace(/^\//, "").split("/").pop() ?? "module.ts";
+    const chunk = extractFromSource(source, fileName, namesToExtract);
     if (chunk.length > 0) {
       parts.push(chunk, "");
     }

@@ -1,7 +1,7 @@
 import { assertEquals, assertFalse, assertStringIncludes } from "@std/assert";
 import {
-  exportsToExtractForFile,
   extractFromSource,
+  resolveExportsToExtract,
 } from "./extract.ts";
 
 const TWO_CLASS_FILE = `// ================================================================
@@ -164,25 +164,144 @@ Deno.test("extractFromSource preserves JSDoc and omits section banners", () => {
   assertFalse(out.includes("===="));
 });
 
-Deno.test("exportsToExtractForFile uses selected exports when present", () => {
+const FILE_A_IMPORTS_KEEP = `import { Keep } from "./b.ts";
+
+export class A {
+  make(): Keep {
+    return new Keep();
+  }
+}
+`;
+
+const FILE_B_KEEP_AND_DROP = `/**
+ * @private
+ */
+const helper = (): number => 1;
+
+export type KeepMeta = { n: number };
+
+export class Keep {
+  meta(): KeepMeta {
+    return { n: helper() };
+  }
+}
+
+export class Drop {
+  gone(): void {}
+}
+`;
+
+const FILE_A_IMPORTS_FOO = `import { Foo } from "./b.ts";
+
+export class A {
+  make(): Foo {
+    return new Foo();
+  }
+}
+`;
+
+const FILE_B_IMPORTS_BAR = `import { Bar } from "./c.ts";
+
+export class Foo {
+  bar(): Bar {
+    return new Bar();
+  }
+}
+
+export class UnusedFoo {}
+`;
+
+const FILE_C_BAR_AND_DROP = `export class Bar {
+  ok(): void {}
+}
+
+export class DropBar {
+  gone(): void {}
+}
+`;
+
+const FILE_A_IMPORTS_KEEP_ALIAS = `import { Keep as KeepAlias } from "./b.ts";
+
+export class A {
+  make(): KeepAlias {
+    return new KeepAlias();
+  }
+}
+`;
+
+Deno.test("resolveExportsToExtract keeps only selected export in its own file", () => {
+  const sources = new Map([
+    ["/src/two.ts", TWO_CLASS_FILE],
+  ]);
   const byPath = new Map([["/src/two.ts", ["Alpha", "Beta"]]]);
-  const names = exportsToExtractForFile(
-    "/src/two.ts",
-    ["Alpha"],
-    byPath,
-  );
-  assertEquals(names, new Set(["Alpha"]));
+  const names = resolveExportsToExtract(sources, ["Alpha"], byPath);
+  assertEquals(names.get("/src/two.ts"), new Set(["Alpha"]));
 });
 
-Deno.test("exportsToExtractForFile includes all exports for dependency-only file", () => {
-  const byPath = new Map([
-    ["/src/two.ts", ["Alpha", "Beta"]],
-    ["/src/dep.ts", ["DepOnly"]],
+Deno.test("resolveExportsToExtract keeps only imported names from a dependency file", () => {
+  const sources = new Map([
+    ["/src/a.ts", FILE_A_IMPORTS_KEEP],
+    ["/src/b.ts", FILE_B_KEEP_AND_DROP],
   ]);
-  const names = exportsToExtractForFile(
-    "/src/dep.ts",
-    ["Alpha"],
-    byPath,
+  const byPath = new Map([
+    ["/src/a.ts", ["A"]],
+    ["/src/b.ts", ["Keep", "Drop"]],
+  ]);
+  const names = resolveExportsToExtract(sources, ["A"], byPath);
+  assertEquals(names.get("/src/a.ts"), new Set(["A"]));
+  assertEquals(names.get("/src/b.ts"), new Set(["Keep"]));
+
+  const out = extractFromSource(
+    FILE_B_KEEP_AND_DROP,
+    "b.ts",
+    names.get("/src/b.ts")!,
   );
-  assertEquals(names, new Set(["DepOnly"]));
+  assertStringIncludes(out, "const helper");
+  assertStringIncludes(out, "type KeepMeta");
+  assertStringIncludes(out, "class Keep");
+  assertFalse(out.includes("class Drop"));
+});
+
+Deno.test("resolveExportsToExtract follows a chain of named imports", () => {
+  const sources = new Map([
+    ["/src/a.ts", FILE_A_IMPORTS_FOO],
+    ["/src/b.ts", FILE_B_IMPORTS_BAR],
+    ["/src/c.ts", FILE_C_BAR_AND_DROP],
+  ]);
+  const byPath = new Map([
+    ["/src/a.ts", ["A"]],
+    ["/src/b.ts", ["Foo", "UnusedFoo"]],
+    ["/src/c.ts", ["Bar", "DropBar"]],
+  ]);
+  const names = resolveExportsToExtract(sources, ["A"], byPath);
+  assertEquals(names.get("/src/a.ts"), new Set(["A"]));
+  assertEquals(names.get("/src/b.ts"), new Set(["Foo"]));
+  assertEquals(names.get("/src/c.ts"), new Set(["Bar"]));
+});
+
+Deno.test("resolveExportsToExtract unions selected names with imported names", () => {
+  const sources = new Map([
+    ["/src/a.ts", FILE_A_IMPORTS_KEEP],
+    ["/src/b.ts", FILE_B_KEEP_AND_DROP],
+  ]);
+  const byPath = new Map([
+    ["/src/a.ts", ["A"]],
+    ["/src/b.ts", ["Keep", "Drop"]],
+  ]);
+  const names = resolveExportsToExtract(sources, ["A", "Drop"], byPath);
+  assertEquals(names.get("/src/a.ts"), new Set(["A"]));
+  assertEquals(names.get("/src/b.ts"), new Set(["Keep", "Drop"]));
+});
+
+Deno.test("resolveExportsToExtract uses original name for aliased imports", () => {
+  const sources = new Map([
+    ["/src/a.ts", FILE_A_IMPORTS_KEEP_ALIAS],
+    ["/src/b.ts", FILE_B_KEEP_AND_DROP],
+  ]);
+  const byPath = new Map([
+    ["/src/a.ts", ["A"]],
+    ["/src/b.ts", ["Keep", "Drop"]],
+  ]);
+  const names = resolveExportsToExtract(sources, ["A"], byPath);
+  assertEquals(names.get("/src/b.ts"), new Set(["Keep"]));
 });
