@@ -4,7 +4,7 @@ import { valid } from "semver";
 const tag = process.argv[2];
 const version = tag?.startsWith("v") ? tag.slice(1) : "";
 if (!version || valid(version) !== version) {
-  throw new Error(`Expected a tag such as v1.0.0 or v1.0.0-alpha.1; got ${tag}`);
+    throw new Error(`Expected a tag such as v1.0.0 or v1.0.0-alpha.1; got ${tag}`);
 }
 const pkg = JSON.parse(await readFile("package.json", "utf8"));
 pkg.version = version;

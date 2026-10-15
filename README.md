@@ -3,6 +3,7 @@
 綾坂ことがAyaExpTech名義で制作しているTypeScriptライブラリ「AyaExpTech Arcane」を適切にコピペするためのツールです。
 
 > AyaExpTech Arcane
+>
 > - GitHub: https://github.com/AXT-Studio/Arcane
 > - JSR: https://jsr.io/@ayaexptech/arcane
 
@@ -99,11 +100,11 @@ npm run compile
 
 成果物は `dist/` に出力されます。
 
-| ファイル | 対象 |
-|----------|------|
-| `dist/axt-arcane-bundler-aarch64-apple-darwin` | macOS (Apple Silicon) |
-| `dist/axt-arcane-bundler-x86_64-pc-windows-msvc.exe` | Windows (x86_64) |
-| `dist/axt-arcane-bundler-x86_64-unknown-linux-gnu` | Linux (x86_64) |
+| ファイル                                             | 対象                  |
+| ---------------------------------------------------- | --------------------- |
+| `dist/axt-arcane-bundler-aarch64-apple-darwin`       | macOS (Apple Silicon) |
+| `dist/axt-arcane-bundler-x86_64-pc-windows-msvc.exe` | Windows (x86_64)      |
+| `dist/axt-arcane-bundler-x86_64-unknown-linux-gnu`   | Linux (x86_64)        |
 
 実行例:
 

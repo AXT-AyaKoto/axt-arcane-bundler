@@ -19,18 +19,18 @@ export class Counter<T extends number> {
 `;
 
 test("TypeScript output is byte-for-byte unchanged", () => {
-  equal(formatOutput(source, "typescript"), source);
+    equal(formatOutput(source, "typescript"), source);
 });
 
 test("JavaScript output strips types after extraction and preserves modern syntax and docs", () => {
-  const extracted = extractFromSource(source, "counter.ts", new Set(["Counter"]));
-  const output = formatOutput(extracted, "javascript");
-  for (const token of ["interface Result", "type Optional", "satisfies Result", "export class", "amount: T"]) {
-    ok(!output.includes(token), token);
-  }
-  ok(output.includes("/** Counter docs. */"));
-  ok(output.includes("#value"));
-  ok(output.includes("??"));
-  equal(runInNewContext(`${output}\nnew Counter().increment(3).value`), 3);
-  equal(runInNewContext(`${output}\nnew Counter().optional()`), 0);
+    const extracted = extractFromSource(source, "counter.ts", new Set(["Counter"]));
+    const output = formatOutput(extracted, "javascript");
+    for (const token of ["interface Result", "type Optional", "satisfies Result", "export class", "amount: T"]) {
+        ok(!output.includes(token), token);
+    }
+    ok(output.includes("/** Counter docs. */"));
+    ok(output.includes("#value"));
+    ok(output.includes("??"));
+    equal(runInNewContext(`${output}\nnew Counter().increment(3).value`), 3);
+    equal(runInNewContext(`${output}\nnew Counter().optional()`), 0);
 });

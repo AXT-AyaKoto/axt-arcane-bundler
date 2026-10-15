@@ -1,392 +1,644 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>AXT-AyaKoto/axt-arcane-bundler</title>
-  <style>
-html {
-color: #1a1a1a;
-background-color: #fdfdfd;
-}
-body {
-margin: 0 auto;
-max-width: 36em;
-padding-left: 50px;
-padding-right: 50px;
-padding-top: 50px;
-padding-bottom: 50px;
-hyphens: auto;
-overflow-wrap: break-word;
-text-rendering: optimizeLegibility;
-font-kerning: normal;
-}
-@media (max-width: 600px) {
-body {
-font-size: 0.9em;
-padding: 12px;
-}
-h1 {
-font-size: 1.8em;
-}
-}
-@media print {
-html {
-background-color: white;
-}
-body {
-background-color: transparent;
-color: black;
-font-size: 12pt;
-}
-p, h2, h3 {
-orphans: 3;
-widows: 3;
-}
-h2, h3, h4 {
-page-break-after: avoid;
-}
-}
-p {
-margin: 1em 0;
-}
-a {
-color: #1a1a1a;
-}
-a:visited {
-color: #1a1a1a;
-}
-img {
-max-width: 100%;
-}
-svg {
-height: auto;
-max-width: 100%;
-}
-h1, h2, h3, h4, h5, h6 {
-margin-top: 1.4em;
-}
-h5, h6 {
-font-size: 1em;
-font-style: italic;
-}
-h6 {
-font-weight: normal;
-}
-ol, ul {
-padding-left: 1.7em;
-margin-top: 1em;
-}
-li > ol, li > ul {
-margin-top: 0;
-}
-blockquote {
-margin: 1em 0 1em 1.7em;
-padding-left: 1em;
-border-left: 2px solid #e6e6e6;
-color: #606060;
-}
-code {
-font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-font-size: 85%;
-margin: 0;
-hyphens: manual;
-}
-pre {
-margin: 1em 0;
-overflow: auto;
-}
-pre code {
-padding: 0;
-overflow: visible;
-overflow-wrap: normal;
-}
-.sourceCode {
-background-color: transparent;
-overflow: visible;
-}
-hr {
-background-color: #1a1a1a;
-border: none;
-height: 1px;
-margin: 1em 0;
-}
-table {
-margin: 1em 0;
-border-collapse: collapse;
-width: 100%;
-overflow-x: auto;
-display: block;
-font-variant-numeric: lining-nums tabular-nums;
-}
-table caption {
-margin-bottom: 0.75em;
-}
-tbody {
-margin-top: 0.5em;
-border-top: 1px solid #1a1a1a;
-border-bottom: 1px solid #1a1a1a;
-}
-th {
-border-top: 1px solid #1a1a1a;
-padding: 0.25em 0.5em 0.25em 0.5em;
-}
-td {
-padding: 0.125em 0.5em 0.25em 0.5em;
-}
-header {
-margin-bottom: 4em;
-text-align: center;
-}
-#TOC li {
-list-style: none;
-}
-#TOC ul {
-padding-left: 1.3em;
-}
-#TOC > ul {
-padding-left: 0;
-}
-#TOC a:not(:hover) {
-text-decoration: none;
-}
-code{white-space: pre-wrap;}
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    <head>
+        <meta charset="utf-8" />
+        <meta name="generator" content="pandoc" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+        <title>AXT-AyaKoto/axt-arcane-bundler</title>
+        <style>
+            html {
+                color: #1a1a1a;
+                background-color: #fdfdfd;
+            }
+            body {
+                margin: 0 auto;
+                max-width: 36em;
+                padding-left: 50px;
+                padding-right: 50px;
+                padding-top: 50px;
+                padding-bottom: 50px;
+                hyphens: auto;
+                overflow-wrap: break-word;
+                text-rendering: optimizeLegibility;
+                font-kerning: normal;
+            }
+            @media (max-width: 600px) {
+                body {
+                    font-size: 0.9em;
+                    padding: 12px;
+                }
+                h1 {
+                    font-size: 1.8em;
+                }
+            }
+            @media print {
+                html {
+                    background-color: white;
+                }
+                body {
+                    background-color: transparent;
+                    color: black;
+                    font-size: 12pt;
+                }
+                p,
+                h2,
+                h3 {
+                    orphans: 3;
+                    widows: 3;
+                }
+                h2,
+                h3,
+                h4 {
+                    page-break-after: avoid;
+                }
+            }
+            p {
+                margin: 1em 0;
+            }
+            a {
+                color: #1a1a1a;
+            }
+            a:visited {
+                color: #1a1a1a;
+            }
+            img {
+                max-width: 100%;
+            }
+            svg {
+                height: auto;
+                max-width: 100%;
+            }
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                margin-top: 1.4em;
+            }
+            h5,
+            h6 {
+                font-size: 1em;
+                font-style: italic;
+            }
+            h6 {
+                font-weight: normal;
+            }
+            ol,
+            ul {
+                padding-left: 1.7em;
+                margin-top: 1em;
+            }
+            li > ol,
+            li > ul {
+                margin-top: 0;
+            }
+            blockquote {
+                margin: 1em 0 1em 1.7em;
+                padding-left: 1em;
+                border-left: 2px solid #e6e6e6;
+                color: #606060;
+            }
+            code {
+                font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
+                font-size: 85%;
+                margin: 0;
+                hyphens: manual;
+            }
+            pre {
+                margin: 1em 0;
+                overflow: auto;
+            }
+            pre code {
+                padding: 0;
+                overflow: visible;
+                overflow-wrap: normal;
+            }
+            .sourceCode {
+                background-color: transparent;
+                overflow: visible;
+            }
+            hr {
+                background-color: #1a1a1a;
+                border: none;
+                height: 1px;
+                margin: 1em 0;
+            }
+            table {
+                margin: 1em 0;
+                border-collapse: collapse;
+                width: 100%;
+                overflow-x: auto;
+                display: block;
+                font-variant-numeric: lining-nums tabular-nums;
+            }
+            table caption {
+                margin-bottom: 0.75em;
+            }
+            tbody {
+                margin-top: 0.5em;
+                border-top: 1px solid #1a1a1a;
+                border-bottom: 1px solid #1a1a1a;
+            }
+            th {
+                border-top: 1px solid #1a1a1a;
+                padding: 0.25em 0.5em 0.25em 0.5em;
+            }
+            td {
+                padding: 0.125em 0.5em 0.25em 0.5em;
+            }
+            header {
+                margin-bottom: 4em;
+                text-align: center;
+            }
+            #TOC li {
+                list-style: none;
+            }
+            #TOC ul {
+                padding-left: 1.3em;
+            }
+            #TOC > ul {
+                padding-left: 0;
+            }
+            #TOC a:not(:hover) {
+                text-decoration: none;
+            }
+            code {
+                white-space: pre-wrap;
+            }
+            span.smallcaps {
+                font-variant: small-caps;
+            }
+            div.columns {
+                display: flex;
+                gap: min(4vw, 1.5em);
+            }
+            div.column {
+                flex: auto;
+                overflow-x: auto;
+            }
+            div.hanging-indent {
+                margin-left: 1.5em;
+                text-indent: -1.5em;
+            }
 
-ul.task-list[class]{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-font-size: inherit;
-width: 0.8em;
-margin: 0 0.8em 0.2em -1.6em;
-vertical-align: middle;
-}
-.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+            ul.task-list[class] {
+                list-style: none;
+            }
+            ul.task-list li input[type="checkbox"] {
+                font-size: inherit;
+                width: 0.8em;
+                margin: 0 0.8em 0.2em -1.6em;
+                vertical-align: middle;
+            }
+            .display.math {
+                display: block;
+                text-align: center;
+                margin: 0.5rem auto;
+            }
 
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-{ counter-reset: source-line 0; }
-pre.numberSource code > span
-{ position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-{ content: counter(source-line);
-position: relative; left: -1em; text-align: right; vertical-align: baseline;
-border: none; display: inline-block;
--webkit-touch-callout: none; -webkit-user-select: none;
--khtml-user-select: none; -moz-user-select: none;
--ms-user-select: none; user-select: none;
-padding: 0 4px; width: 4em;
-color: #aaaaaa;
-}
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
-div.sourceCode
-{ }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; }
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; }
-code span.at { color: #7d9029; }
-code span.bn { color: #40a070; }
-code span.bu { color: #008000; }
-code span.cf { color: #007020; font-weight: bold; }
-code span.ch { color: #4070a0; }
-code span.cn { color: #880000; }
-code span.co { color: #60a0b0; font-style: italic; }
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; }
-code span.do { color: #ba2121; font-style: italic; }
-code span.dt { color: #902000; }
-code span.dv { color: #40a070; }
-code span.er { color: #ff0000; font-weight: bold; }
-code span.ex { }
-code span.fl { color: #40a070; }
-code span.fu { color: #06287e; }
-code span.im { color: #008000; font-weight: bold; }
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; }
-code span.kw { color: #007020; font-weight: bold; }
-code span.op { color: #666666; }
-code span.ot { color: #007020; }
-code span.pp { color: #bc7a00; }
-code span.sc { color: #4070a0; }
-code span.ss { color: #bb6688; }
-code span.st { color: #4070a0; }
-code span.va { color: #19177c; }
-code span.vs { color: #4070a0; }
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
-</style>
-</head>
-<body>
-<header id="title-block-header">
-<h1 class="title">AXT-AyaKoto/axt-arcane-bundler</h1>
-</header>
-<h1 id="axt-ayakotoaxt-arcane-bundler">AXT-AyaKoto/axt-arcane-bundler</h1>
-<p>綾坂ことがAyaExpTech名義で制作しているTypeScriptライブラリ「AyaExpTech
-Arcane」を適切にコピペするためのツールです。</p>
-<blockquote>
-<p>AyaExpTech Arcane - GitHub: https://github.com/AXT-Studio/Arcane -
-JSR: https://jsr.io/<span class="citation" data-cites="ayaexptech/arcane">@ayaexptech/arcane</span></p>
-</blockquote>
-<h2 id="license">License</h2>
-<p>2026- (c) Ayasaka-Koto.<br />
-This is released under <a href="./LICENSE">the MIT License</a>.</p>
-<h2 id="how-to-use">How to Use</h2>
-<h3 id="github-releasesから利用する-推奨">GitHub Releasesから利用する
-(推奨)</h3>
-<p>Node.js
-22.13以降の22系、または24以降をインストールしたうえで、以下のコマンドでウィザードを起動します。<code>v1.0.0</code>・<code>1.0.0</code>
-は使用するリリースに置き換えてください。</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> <span class="at">--yes</span> https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz</span></code></pre></div>
-<p>Bunの現行安定版でも実行できます。<code>--bun</code>
-を指定すると、Node.jsではなくBunで実行します。</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bunx</span> <span class="at">--bun</span> axt-arcane-bundler@https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz</span></code></pre></div>
-<p>Bun
-1.4.3ではtgzのURLだけを渡す形式がエラーになるため、<code>axt-arcane-bundler@URL</code>
-と指定します。</p>
-<p>配布するtgzにはビルド済みのES
-Moduleと依存ライブラリが含まれています。Denoのインストールは不要です。ただし、実行時にArcaneのソースをJSRから取得するため、ネットワーク接続は必要です。</p>
-<h3 id="リポジトリをクローンして利用する-開発用">リポジトリをクローンして利用する
-(開発用)</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> ci</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> start</span></code></pre></div>
-<p>Bunで実行する場合も、依存のインストールには共通の<code>package-lock.json</code>を使います。</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> ci</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run exec.ts</span></code></pre></div>
-<h3 id="ウィザードの使用方法">ウィザードの使用方法</h3>
-<p>上記コマンドを実行すると、コピペのためのウィザードがCLIとして起動します。
-ウィザード内で問われる質問は以下のとおりです。</p>
-<ol type="1">
-<li><code>version:</code> (検索付き単一選択)
-<ul>
-<li>どのバージョンの <a href="https://github.com/AXT-Studio/Arcane">AyaExpTech Arcane</a>（<a href="https://jsr.io/@ayaexptech/arcane"><code>jsr:@ayaexptech/arcane</code></a>）からコピペするかを指定します。</li>
-<li>JSRからプレリリースを含む公開済みバージョンを取得し、SemVerで新しい順に表示します。文字を入力するとバージョン名で絞り込めます。</li>
-<li>安定版がある場合、先頭の <code>Latest stable</code>
-がデフォルトです。安定版がない場合は、プレリリースを含む最新バージョンがデフォルトです。</li>
-<li><code>Latest stable</code>
-を選ぶと生成コメントのパッケージ指定にバージョンを付けず、個別のバージョンを選ぶと固定します。取得に使ったバージョンはどちらの場合もコメントに記録します。</li>
-</ul></li>
-<li><code>imports:</code> (チェックボックス 複数選択可)
-<ul>
-<li>AyaExpTech
-Arcaneが提供しているモジュール・クラスのうち、どれをコピペするかを指定します。</li>
-<li>選択肢は、選択したバージョンの <code>mod.ts</code> から
-<strong>自動取得</strong> され、辞書順に表示されます。</li>
-<li>スペースキーで選択を切り替え、Enterで確定します。検索機能はありません。</li>
-<li>何も選択せずに確定した場合、クリップボードを変更せず正常終了します。</li>
-</ul></li>
-<li><code>output:</code> (単一選択)
-<ul>
-<li><code>TypeScript</code> (デフォルト):
-従来どおりTypeScriptソースをコピーします。</li>
-<li><code>JavaScript (strip types)</code>:
-Sucraseで型を除去してコピーします。minifyや古いJavaScript実行環境向けの構文変換は行いません。</li>
-</ul></li>
-</ol>
-<p>上記のすべての質問に回答し終わると、クリップボードに (2) で選択した
-export
-のソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、<code>export</code>
-キーワードは付きません（JSDoc は保持されます）。</p>
-<blockquote>
-<p>[!NOTE] (2)
-で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のコードも自動的に含まれます（例:
-<code>ModOps</code> を選ぶと <code>ExtendedMath</code>
-も含まれる）。</p>
-<p>同一ソースファイルに複数の export がある場合、選択した export
-のみが含まれます（例: <code>BinaryHeap</code> のみを選んだとき
-<code>BinaryHeapLite</code>
-は含まれません）。依存先のファイルでも、実際に参照されている export
-だけが残ります（例: <code>TwoSAT</code> を選んでも
-<code>UndirectedGraph</code> は含まれません）。</p>
-</blockquote>
-<p>JSRから必要な情報やソースを取得できない場合はエラーで終了します。export一覧の取得に失敗した場合は、従来どおり組み込みの候補一覧を表示します。Ctrl+Cで質問を中断できます。</p>
-<h2 id="development">Development</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run check        <span class="co"># 型チェック</span></span>
+            pre > code.sourceCode {
+                white-space: pre;
+                position: relative;
+            }
+            pre > code.sourceCode > span {
+                line-height: 1.25;
+            }
+            pre > code.sourceCode > span:empty {
+                height: 1.2em;
+            }
+            .sourceCode {
+                overflow: visible;
+            }
+            code.sourceCode > span {
+                color: inherit;
+                text-decoration: inherit;
+            }
+            div.sourceCode {
+                margin: 1em 0;
+            }
+            pre.sourceCode {
+                margin: 0;
+            }
+            @media screen {
+                div.sourceCode {
+                    overflow: auto;
+                }
+            }
+            @media print {
+                pre > code.sourceCode {
+                    white-space: pre-wrap;
+                }
+                pre > code.sourceCode > span {
+                    display: inline-block;
+                    text-indent: -5em;
+                    padding-left: 5em;
+                }
+            }
+            pre.numberSource code {
+                counter-reset: source-line 0;
+            }
+            pre.numberSource code > span {
+                position: relative;
+                left: -4em;
+                counter-increment: source-line;
+            }
+            pre.numberSource code > span > a:first-child::before {
+                content: counter(source-line);
+                position: relative;
+                left: -1em;
+                text-align: right;
+                vertical-align: baseline;
+                border: none;
+                display: inline-block;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                padding: 0 4px;
+                width: 4em;
+                color: #aaaaaa;
+            }
+            pre.numberSource {
+                margin-left: 3em;
+                border-left: 1px solid #aaaaaa;
+                padding-left: 4px;
+            }
+            div.sourceCode {
+            }
+            @media screen {
+                pre > code.sourceCode > span > a:first-child::before {
+                    text-decoration: underline;
+                }
+            }
+            code span.al {
+                color: #ff0000;
+                font-weight: bold;
+            }
+            code span.an {
+                color: #60a0b0;
+                font-weight: bold;
+                font-style: italic;
+            }
+            code span.at {
+                color: #7d9029;
+            }
+            code span.bn {
+                color: #40a070;
+            }
+            code span.bu {
+                color: #008000;
+            }
+            code span.cf {
+                color: #007020;
+                font-weight: bold;
+            }
+            code span.ch {
+                color: #4070a0;
+            }
+            code span.cn {
+                color: #880000;
+            }
+            code span.co {
+                color: #60a0b0;
+                font-style: italic;
+            }
+            code span.cv {
+                color: #60a0b0;
+                font-weight: bold;
+                font-style: italic;
+            }
+            code span.do {
+                color: #ba2121;
+                font-style: italic;
+            }
+            code span.dt {
+                color: #902000;
+            }
+            code span.dv {
+                color: #40a070;
+            }
+            code span.er {
+                color: #ff0000;
+                font-weight: bold;
+            }
+            code span.ex {
+            }
+            code span.fl {
+                color: #40a070;
+            }
+            code span.fu {
+                color: #06287e;
+            }
+            code span.im {
+                color: #008000;
+                font-weight: bold;
+            }
+            code span.in {
+                color: #60a0b0;
+                font-weight: bold;
+                font-style: italic;
+            }
+            code span.kw {
+                color: #007020;
+                font-weight: bold;
+            }
+            code span.op {
+                color: #666666;
+            }
+            code span.ot {
+                color: #007020;
+            }
+            code span.pp {
+                color: #bc7a00;
+            }
+            code span.sc {
+                color: #4070a0;
+            }
+            code span.ss {
+                color: #bb6688;
+            }
+            code span.st {
+                color: #4070a0;
+            }
+            code span.va {
+                color: #19177c;
+            }
+            code span.vs {
+                color: #4070a0;
+            }
+            code span.wa {
+                color: #60a0b0;
+                font-weight: bold;
+                font-style: italic;
+            }
+        </style>
+    </head>
+    <body>
+        <header id="title-block-header">
+            <h1 class="title">AXT-AyaKoto/axt-arcane-bundler</h1>
+        </header>
+        <h1 id="axt-ayakotoaxt-arcane-bundler">AXT-AyaKoto/axt-arcane-bundler</h1>
+        <p>
+            綾坂ことがAyaExpTech名義で制作しているTypeScriptライブラリ「AyaExpTech
+            Arcane」を適切にコピペするためのツールです。
+        </p>
+        <blockquote>
+            <p>
+                AyaExpTech Arcane - GitHub: https://github.com/AXT-Studio/Arcane - JSR:
+                https://jsr.io/<span class="citation" data-cites="ayaexptech/arcane"
+                    >@ayaexptech/arcane</span
+                >
+            </p>
+        </blockquote>
+        <h2 id="license">License</h2>
+        <p>
+            2026- (c) Ayasaka-Koto.<br />
+            This is released under <a href="./LICENSE">the MIT License</a>.
+        </p>
+        <h2 id="how-to-use">How to Use</h2>
+        <h3 id="github-releasesから利用する-推奨">GitHub Releasesから利用する (推奨)</h3>
+        <p>
+            Node.js
+            22.13以降の22系、または24以降をインストールしたうえで、以下のコマンドでウィザードを起動します。<code>v1.0.0</code>・<code
+                >1.0.0</code
+            >
+            は使用するリリースに置き換えてください。
+        </p>
+        <div class="sourceCode" id="cb1">
+            <pre
+                class="sourceCode sh"
+            ><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> <span class="at">--yes</span> https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz</span></code></pre>
+        </div>
+        <p>
+            Bunの現行安定版でも実行できます。<code>--bun</code>
+            を指定すると、Node.jsではなくBunで実行します。
+        </p>
+        <div class="sourceCode" id="cb2">
+            <pre
+                class="sourceCode sh"
+            ><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bunx</span> <span class="at">--bun</span> axt-arcane-bundler@https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz</span></code></pre>
+        </div>
+        <p>
+            Bun 1.4.3ではtgzのURLだけを渡す形式がエラーになるため、<code
+                >axt-arcane-bundler@URL</code
+            >
+            と指定します。
+        </p>
+        <p>
+            配布するtgzにはビルド済みのES
+            Moduleと依存ライブラリが含まれています。Denoのインストールは不要です。ただし、実行時にArcaneのソースをJSRから取得するため、ネットワーク接続は必要です。
+        </p>
+        <h3 id="リポジトリをクローンして利用する-開発用">
+            リポジトリをクローンして利用する (開発用)
+        </h3>
+        <div class="sourceCode" id="cb3">
+            <pre
+                class="sourceCode sh"
+            ><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> ci</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> start</span></code></pre>
+        </div>
+        <p>
+            Bunで実行する場合も、依存のインストールには共通の<code>package-lock.json</code>を使います。
+        </p>
+        <div class="sourceCode" id="cb4">
+            <pre
+                class="sourceCode sh"
+            ><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> ci</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run exec.ts</span></code></pre>
+        </div>
+        <h3 id="ウィザードの使用方法">ウィザードの使用方法</h3>
+        <p>
+            上記コマンドを実行すると、コピペのためのウィザードがCLIとして起動します。
+            ウィザード内で問われる質問は以下のとおりです。
+        </p>
+        <ol type="1">
+            <li>
+                <code>version:</code> (検索付き単一選択)
+                <ul>
+                    <li>
+                        どのバージョンの
+                        <a href="https://github.com/AXT-Studio/Arcane">AyaExpTech Arcane</a>（<a
+                            href="https://jsr.io/@ayaexptech/arcane"
+                            ><code>jsr:@ayaexptech/arcane</code></a
+                        >）からコピペするかを指定します。
+                    </li>
+                    <li>
+                        JSRからプレリリースを含む公開済みバージョンを取得し、SemVerで新しい順に表示します。文字を入力するとバージョン名で絞り込めます。
+                    </li>
+                    <li>
+                        安定版がある場合、先頭の
+                        <code>Latest stable</code>
+                        がデフォルトです。安定版がない場合は、プレリリースを含む最新バージョンがデフォルトです。
+                    </li>
+                    <li>
+                        <code>Latest stable</code>
+                        を選ぶと生成コメントのパッケージ指定にバージョンを付けず、個別のバージョンを選ぶと固定します。取得に使ったバージョンはどちらの場合もコメントに記録します。
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <code>imports:</code> (チェックボックス 複数選択可)
+                <ul>
+                    <li>
+                        AyaExpTech
+                        Arcaneが提供しているモジュール・クラスのうち、どれをコピペするかを指定します。
+                    </li>
+                    <li>
+                        選択肢は、選択したバージョンの <code>mod.ts</code> から
+                        <strong>自動取得</strong> され、辞書順に表示されます。
+                    </li>
+                    <li>スペースキーで選択を切り替え、Enterで確定します。検索機能はありません。</li>
+                    <li>何も選択せずに確定した場合、クリップボードを変更せず正常終了します。</li>
+                </ul>
+            </li>
+            <li>
+                <code>output:</code> (単一選択)
+                <ul>
+                    <li>
+                        <code>TypeScript</code> (デフォルト):
+                        従来どおりTypeScriptソースをコピーします。
+                    </li>
+                    <li>
+                        <code>JavaScript (strip types)</code>:
+                        Sucraseで型を除去してコピーします。minifyや古いJavaScript実行環境向けの構文変換は行いません。
+                    </li>
+                </ul>
+            </li>
+        </ol>
+        <p>
+            上記のすべての質問に回答し終わると、クリップボードに (2) で選択した export
+            のソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、<code
+                >export</code
+            >
+            キーワードは付きません（JSDoc は保持されます）。
+        </p>
+        <blockquote>
+            <p>
+                [!NOTE] (2)
+                で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のコードも自動的に含まれます（例:
+                <code>ModOps</code> を選ぶと <code>ExtendedMath</code> も含まれる）。
+            </p>
+            <p>
+                同一ソースファイルに複数の export がある場合、選択した export のみが含まれます（例:
+                <code>BinaryHeap</code> のみを選んだとき
+                <code>BinaryHeapLite</code>
+                は含まれません）。依存先のファイルでも、実際に参照されている export
+                だけが残ります（例: <code>TwoSAT</code> を選んでも
+                <code>UndirectedGraph</code> は含まれません）。
+            </p>
+        </blockquote>
+        <p>
+            JSRから必要な情報やソースを取得できない場合はエラーで終了します。export一覧の取得に失敗した場合は、従来どおり組み込みの候補一覧を表示します。Ctrl+Cで質問を中断できます。
+        </p>
+        <h2 id="development">Development</h2>
+        <div class="sourceCode" id="cb5">
+            <pre
+                class="sourceCode sh"
+            ><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run check        <span class="co"># 型チェック</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> test             <span class="co"># Node.jsでテスト</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run test:bun     <span class="co"># Bunで同じテスト</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run build        <span class="co"># dist/cli.js (ES Module) を生成</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> pack             <span class="co"># axt-arcane-bundler-0.0.0.tgz を生成 (ビルドも自動実行)</span></span></code></pre></div>
-<p>配布物の動作確認は、Linux上でNode.jsとBunを用意して以下を実行します。JSRとクリップボードはテスト用のものを使い、実際のクリップボードは変更しません。</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run test:package <span class="at">--</span> ./axt-arcane-bundler-0.0.0.tgz</span></code></pre></div>
-<h2 id="building-standalone-binaries">Building standalone binaries</h2>
-<p>Bunと開発用の依存が入っている環境で、macOS (Apple
-Silicon)・Windows・Linux 向けのバイナリをまとめてビルドできます。</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run compile</span></code></pre></div>
-<p>成果物は <code>dist/</code> に出力されます。</p>
-<table>
-<colgroup>
-<col style="width: 62%" />
-<col style="width: 37%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>ファイル</th>
-<th>対象</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>dist/axt-arcane-bundler-aarch64-apple-darwin</code></td>
-<td>macOS (Apple Silicon)</td>
-</tr>
-<tr class="even">
-<td><code>dist/axt-arcane-bundler-x86_64-pc-windows-msvc.exe</code></td>
-<td>Windows (x86_64)</td>
-</tr>
-<tr class="odd">
-<td><code>dist/axt-arcane-bundler-x86_64-unknown-linux-gnu</code></td>
-<td>Linux (x86_64)</td>
-</tr>
-</tbody>
-</table>
-<p>実行例:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># macOS</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> pack             <span class="co"># axt-arcane-bundler-0.0.0.tgz を生成 (ビルドも自動実行)</span></span></code></pre>
+        </div>
+        <p>
+            配布物の動作確認は、Linux上でNode.jsとBunを用意して以下を実行します。JSRとクリップボードはテスト用のものを使い、実際のクリップボードは変更しません。
+        </p>
+        <div class="sourceCode" id="cb6">
+            <pre
+                class="sourceCode sh"
+            ><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run test:package <span class="at">--</span> ./axt-arcane-bundler-0.0.0.tgz</span></code></pre>
+        </div>
+        <h2 id="building-standalone-binaries">Building standalone binaries</h2>
+        <p>
+            Bunと開発用の依存が入っている環境で、macOS (Apple Silicon)・Windows・Linux
+            向けのバイナリをまとめてビルドできます。
+        </p>
+        <div class="sourceCode" id="cb7">
+            <pre
+                class="sourceCode sh"
+            ><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run compile</span></code></pre>
+        </div>
+        <p>成果物は <code>dist/</code> に出力されます。</p>
+        <table>
+            <colgroup>
+                <col style="width: 62%" />
+                <col style="width: 37%" />
+            </colgroup>
+            <thead>
+                <tr class="header">
+                    <th>ファイル</th>
+                    <th>対象</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="odd">
+                    <td><code>dist/axt-arcane-bundler-aarch64-apple-darwin</code></td>
+                    <td>macOS (Apple Silicon)</td>
+                </tr>
+                <tr class="even">
+                    <td><code>dist/axt-arcane-bundler-x86_64-pc-windows-msvc.exe</code></td>
+                    <td>Windows (x86_64)</td>
+                </tr>
+                <tr class="odd">
+                    <td><code>dist/axt-arcane-bundler-x86_64-unknown-linux-gnu</code></td>
+                    <td>Linux (x86_64)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>実行例:</p>
+        <div class="sourceCode" id="cb8">
+            <pre
+                class="sourceCode sh"
+            ><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># macOS</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./dist/axt-arcane-bundler-aarch64-apple-darwin</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Linux</span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./dist/axt-arcane-bundler-x86_64-unknown-linux-gnu</span></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Windows (PowerShell)</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="bu">.</span><span class="dt">\d</span>ist<span class="dt">\a</span>xt-arcane-bundler-x86_64-pc-windows-msvc.exe</span></code></pre></div>
-<p>Bunの <code>build --compile</code>
-で生成します。実行時にNode.js・Bunのインストールや権限フラグは不要ですが、JSRへのネットワーク接続は必要です。単体バイナリは手動ビルド用で、Releaseに自動添付するのはtgzです。</p>
-<p>クリップボード連携: macOS は <code>pbcopy</code>、Windows は
-<code>clip</code>、Linux は <code>wl-copy</code> / <code>xclip</code> /
-<code>xsel</code>（いずれかが PATH にある場合）を使用します。</p>
-<h2 id="releasing">Releasing</h2>
-<p>GitHub Releasesへのtgzの添付はGitHub Actionsで行います。</p>
-<ol type="1">
-<li>変更を <code>main</code> にmergeする</li>
-<li>GitHubでReleaseを作成し、対象コミットに <code>vX.Y.Z</code> または
-<code>vX.Y.Z-alpha.N</code> などのタグを付けて <strong>Publish
-release</strong> を押す</li>
-<li><a href=".github/workflows/publish.yml">Build Release package</a>
-がタグのコミットをcheckoutし、型チェック・テスト・ビルド・梱包・Node.js/Bunでの配布物検証を行う</li>
-<li>同じReleaseのAssetsに <code>axt-arcane-bundler-X.Y.Z.tgz</code>
-が添付される</li>
-</ol>
-<p>下書きの保存やタグのpushだけでは起動しません。プレリリースの公開も対象です。Release公開からAsset添付まではビルド時間がかかります。</p>
-<p>手動確認はGitHub Actions → <strong>Build Release package</strong> →
-<strong>Run workflow</strong> から行えます。<code>tag_name</code>
-に既存のタグを指定し、<code>dry_run</code>
-をオンにすると、Releaseには添付せずActionsのArtifactにtgzを保存します。オフにすると、指定した既存Releaseに添付します。再実行時は同名Assetを置き換えます。</p>
-<p>リポジトリ上の
-<code>package.json</code>・<code>package-lock.json</code> のバージョンは
-<code>0.0.0</code>
-のままです。CIがタグからSemVerを読み取り、ビルド時だけ差し替えます。npmレジストリや、このツールの旧JSRパッケージには公開しません。Arcaneの取得元は引き続きJSRです。</p>
-</body>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="bu">.</span><span class="dt">\d</span>ist<span class="dt">\a</span>xt-arcane-bundler-x86_64-pc-windows-msvc.exe</span></code></pre>
+        </div>
+        <p>
+            Bunの
+            <code>build --compile</code>
+            で生成します。実行時にNode.js・Bunのインストールや権限フラグは不要ですが、JSRへのネットワーク接続は必要です。単体バイナリは手動ビルド用で、Releaseに自動添付するのはtgzです。
+        </p>
+        <p>
+            クリップボード連携: macOS は <code>pbcopy</code>、Windows は <code>clip</code>、Linux は
+            <code>wl-copy</code> / <code>xclip</code> / <code>xsel</code>（いずれかが PATH
+            にある場合）を使用します。
+        </p>
+        <h2 id="releasing">Releasing</h2>
+        <p>GitHub Releasesへのtgzの添付はGitHub Actionsで行います。</p>
+        <ol type="1">
+            <li>変更を <code>main</code> にmergeする</li>
+            <li>
+                GitHubでReleaseを作成し、対象コミットに <code>vX.Y.Z</code> または
+                <code>vX.Y.Z-alpha.N</code> などのタグを付けて
+                <strong>Publish release</strong> を押す
+            </li>
+            <li>
+                <a href=".github/workflows/publish.yml">Build Release package</a>
+                がタグのコミットをcheckoutし、型チェック・テスト・ビルド・梱包・Node.js/Bunでの配布物検証を行う
+            </li>
+            <li>同じReleaseのAssetsに <code>axt-arcane-bundler-X.Y.Z.tgz</code> が添付される</li>
+        </ol>
+        <p>
+            下書きの保存やタグのpushだけでは起動しません。プレリリースの公開も対象です。Release公開からAsset添付まではビルド時間がかかります。
+        </p>
+        <p>
+            手動確認はGitHub Actions → <strong>Build Release package</strong> →
+            <strong>Run workflow</strong> から行えます。<code>tag_name</code>
+            に既存のタグを指定し、<code>dry_run</code>
+            をオンにすると、Releaseには添付せずActionsのArtifactにtgzを保存します。オフにすると、指定した既存Releaseに添付します。再実行時は同名Assetを置き換えます。
+        </p>
+        <p>
+            リポジトリ上の <code>package.json</code>・<code>package-lock.json</code> のバージョンは
+            <code>0.0.0</code>
+            のままです。CIがタグからSemVerを読み取り、ビルド時だけ差し替えます。npmレジストリや、このツールの旧JSRパッケージには公開しません。Arcaneの取得元は引き続きJSRです。
+        </p>
+    </body>
 </html>
