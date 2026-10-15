@@ -9,63 +9,40 @@
 
 ## License
 
-2026- (c) Ayasaka-Koto.  
+copyright (c) 2026- Ayasaka-Koto.
 This is released under [the MIT License](./LICENSE).
+
+> [!NOTE]
+> このツールは、そのほとんどがAIによって実装された、いわゆるVibe-Codingプロダクトです。  
+> AIへの指示を行った私(綾坂こと)がDogfoodingを行っているためある程度品質については保証しますが、Vibe-Codingによるプロダクトであることには留意してください。  
 
 ## How to Use
 
-### GitHub Releasesから利用する (推奨)
+ウィザードの使用方法自体は「従うだけ」なので割愛します。
+TypeScriptでコピーする他に、JavaScriptにType Strippingしてコピーすることもできます。
 
-Node.js 22.13以降の22系、または24以降をインストールしたうえで、以下のコマンドでウィザードを起動します。`v1.0.0`・`1.0.0` は使用するリリースに置き換えてください。
+実行のためには以下のいずれかが必要です。
 
-```sh
-pnpm dlx https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz
-```
+- Node.js (22.13以降) と pnpm
+- Bun
 
-Bunの現行安定版でも実行できます。`--bun` を指定すると、Node.jsではなくBunで実行します。
+また、実行時はネットワーク接続が必要です。
 
-```sh
-bunx --bun axt-arcane-bundler@https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz
-```
+### GitHub Releasesから利用
 
-Bun 1.4.3ではtgzのURLだけを渡す形式がエラーになるため、`axt-arcane-bundler@URL` と指定します。
+- Node.js・pnpmの場合: `pnpm dlx https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz`
+- Bunの場合: `bunx --bun axt-arcane-bundler@https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz`
 
-配布するtgzにはビルド済みのES Moduleと依存ライブラリが含まれています。Denoのインストールは不要です。ただし、実行時にArcaneのソースをJSRから取得するため、ネットワーク接続は必要です。
+バージョン番号(URL内2箇所)は適宜置き換えてください。
 
-### リポジトリをクローンして利用する (開発用)
+### リポジトリをクローンして利用 (開発用)
 
 ```sh
 pnpm install
 pnpm run start
 ```
 
-### ウィザードの使用方法
-
-上記コマンドを実行すると、コピペのためのウィザードがCLIとして起動します。
-ウィザード内で問われる質問は以下のとおりです。
-
-1. `version:` (検索付き単一選択)
-    - どのバージョンの [AyaExpTech Arcane](https://github.com/AXT-Studio/Arcane)（[`jsr:@ayaexptech/arcane`](https://jsr.io/@ayaexptech/arcane)）からコピペするかを指定します。
-    - JSRからプレリリースを含む公開済みバージョンを取得し、SemVerで新しい順に表示します。文字を入力するとバージョン名で絞り込めます。
-    - 安定版がある場合、先頭の `Latest stable` がデフォルトです。安定版がない場合は、プレリリースを含む最新バージョンがデフォルトです。
-    - `Latest stable` を選ぶと生成コメントのパッケージ指定にバージョンを付けず、個別のバージョンを選ぶと固定します。取得に使ったバージョンはどちらの場合もコメントに記録します。
-2. `imports:` (チェックボックス 複数選択可)
-    - AyaExpTech Arcaneが提供しているモジュール・クラスのうち、どれをコピペするかを指定します。
-    - 選択肢は、選択したバージョンの `mod.ts` から **自動取得** され、辞書順に表示されます。
-    - スペースキーで選択を切り替え、Enterで確定します。検索機能はありません。
-    - 何も選択せずに確定した場合、クリップボードを変更せず正常終了します。
-3. `output:` (単一選択)
-    - `TypeScript` (デフォルト): そのままTypeScriptソースをコピーします。
-    - `JavaScript (strip types)`: Sucraseで型を除去してコピーします。minifyや古いJavaScript実行環境向けの構文変換は行いません。
-
-上記のすべての質問に回答し終わると、クリップボードに (2) で選択した export のソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、`export` キーワードは付きません（JSDoc は保持されます）。
-
-> [!NOTE]
-> (2) で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のコードも自動的に含まれます（例: `ModOps` を選ぶと `ExtendedMath` も含まれる）。
->
-> 同一ソースファイルに複数の export がある場合、選択した export のみが含まれます（例: `BinaryHeap` のみを選んだとき `BinaryHeapLite` は含まれません）。依存先のファイルでも、実際に参照されている export だけが残ります（例: `TwoSAT` を選んでも `UndirectedGraph` は含まれません）。
-
-JSRから必要な情報やソースを取得できない場合はエラーで終了します。export一覧の取得に失敗した場合は、従来どおり組み込みの候補一覧を表示します。Ctrl+Cで質問を中断できます。
+---
 
 ## Development
 
