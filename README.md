@@ -35,15 +35,8 @@ Bun 1.4.3ではtgzのURLだけを渡す形式がエラーになるため、`axt-
 ### リポジトリをクローンして利用する (開発用)
 
 ```sh
-npm ci
-npm start
-```
-
-Bunで実行する場合も、依存のインストールには共通の`package-lock.json`を使います。
-
-```sh
-npm ci
-bun run exec.ts
+pnpm install
+pnpm run start
 ```
 
 ### ウィザードの使用方法
@@ -62,7 +55,7 @@ bun run exec.ts
     - スペースキーで選択を切り替え、Enterで確定します。検索機能はありません。
     - 何も選択せずに確定した場合、クリップボードを変更せず正常終了します。
 3. `output:` (単一選択)
-    - `TypeScript` (デフォルト): 従来どおりTypeScriptソースをコピーします。
+    - `TypeScript` (デフォルト): そのままTypeScriptソースをコピーします。
     - `JavaScript (strip types)`: Sucraseで型を除去してコピーします。minifyや古いJavaScript実行環境向けの構文変換は行いません。
 
 上記のすべての質問に回答し終わると、クリップボードに (2) で選択した export のソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、`export` キーワードは付きません（JSDoc は保持されます）。
