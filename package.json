@@ -1,0 +1,41 @@
+{
+  "name": "axt-arcane-bundler",
+  "version": "0.0.0",
+  "description": "Copy selected AyaExpTech Arcane sources and their dependencies to the clipboard.",
+  "type": "module",
+  "license": "MIT",
+  "repository": "github:AXT-AyaKoto/axt-arcane-bundler",
+  "engines": {
+    "node": "^22.13.0 || >=24.0.0"
+  },
+  "bin": {
+    "axt-arcane-bundler": "./dist/cli.js"
+  },
+  "files": [
+    "dist/cli.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node --import tsx exec.ts",
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test src/*_test.ts",
+    "test:bun": "bun test ./src",
+    "build": "node scripts/build.mjs",
+    "compile": "node scripts/compile-all.mjs",
+    "prepack": "npm run build",
+    "test:package": "node scripts/smoke-package.mjs"
+  },
+  "devDependencies": {
+    "@inquirer/prompts": "8.7.3",
+    "@inquirer/testing": "3.3.14",
+    "@types/node": "^22.0.0",
+    "@types/semver": "^7.7.0",
+    "esbuild": "^0.28.2",
+    "picocolors": "^1.1.1",
+    "semver": "^7.7.0",
+    "sucrase": "3.35.1",
+    "tsx": "^4.20.0",
+    "typescript": "5.8.3"
+  }
+}

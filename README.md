@@ -6,9 +6,6 @@
 > - GitHub: https://github.com/AXT-Studio/Arcane
 > - JSR: https://jsr.io/@ayaexptech/arcane
 
-> このツール (axt-arcane-bundler)
-> - JSR: https://jsr.io/@axt-ayakoto/axt-arcane-bundler
-
 ## License
 
 2026- (c) Ayasaka-Koto.  
@@ -16,30 +13,36 @@ This is released under [the MIT License](./LICENSE).
 
 ## How to Use
 
-### JSRから直接利用する (推奨)
+### GitHub Releasesから利用する (推奨)
 
-事前にDenoをインストールしたうえで、以下のコマンドでウィザードを起動します。
+Node.js 22.13以降の22系、または24以降をインストールしたうえで、以下のコマンドでウィザードを起動します。`v1.0.0`・`1.0.0` は使用するリリースに置き換えてください。
 
 ```sh
-deno run -A jsr:@axt-ayakoto/axt-arcane-bundler
+npx --yes https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz
 ```
 
-> [!TIP]
-> 実行バージョンを固定したい場合は、以下のようなコマンドを使用することができます。
-> ```sh
-> deno run -A jsr:@axt-ayakoto/axt-arcane-bundler@1.0.0
-> ```
+Bunの現行安定版でも実行できます。`--bun` を指定すると、Node.jsではなくBunで実行します。
+
+```sh
+bunx --bun axt-arcane-bundler@https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz
+```
+
+Bun 1.4.3ではtgzのURLだけを渡す形式がエラーになるため、`axt-arcane-bundler@URL` と指定します。
+
+配布するtgzにはビルド済みのES Moduleと依存ライブラリが含まれています。Denoのインストールは不要です。ただし、実行時にArcaneのソースをJSRから取得するため、ネットワーク接続は必要です。
 
 ### リポジトリをクローンして利用する (開発用)
 
-事前にDenoをインストールし、リポジトリをクローンしたうえで、以下のいずれかのコマンドでウィザードを起動します。
-
 ```sh
-deno run ./exec.ts --allow-net --allow-read --allow-run --allow-env
+npm ci
+npm start
 ```
 
+Bunで実行する場合も、依存のインストールには共通の`package-lock.json`を使います。
+
 ```sh
-deno task start
+npm ci
+bun run exec.ts
 ```
 
 ### ウィザードの使用方法
@@ -47,32 +50,51 @@ deno task start
 上記コマンドを実行すると、コピペのためのウィザードがCLIとして起動します。
 ウィザード内で問われる質問は以下のとおりです。
 
-1. `version: ` (短文自由入力)
+1. `version:` (検索付き単一選択)
     - どのバージョンの [AyaExpTech Arcane](https://github.com/AXT-Studio/Arcane)（[`jsr:@ayaexptech/arcane`](https://jsr.io/@ayaexptech/arcane)）からコピペするかを指定します。
-    - `1.0.0-alpha.3` のように、`v` などはつけずにバージョン番号を入力します。
-    - 入力せず次に進むこともできます。この場合は JSR 上の最新安定版（`latest`）を参照します。安定版が未公開のときは、公開済みバージョンのうち最も新しいものがヒントとして表示されます。
-2. `imports: ` (チェックボックス 複数選択可)
-    - AyaExpTech Arcane が提供しているモジュール・クラスのうち、どれをコピペするかを指定します。
-    - 選択肢は、指定（または解決）したバージョンの `mod.ts` から **自動取得** され、辞書順に表示されます。
-    - 複数選択も可能です。また、1つ以上選択する必要があります。
+    - JSRからプレリリースを含む公開済みバージョンを取得し、SemVerで新しい順に表示します。文字を入力するとバージョン名で絞り込めます。
+    - 安定版がある場合、先頭の `Latest stable` がデフォルトです。安定版がない場合は、プレリリースを含む最新バージョンがデフォルトです。
+    - `Latest stable` を選ぶと生成コメントのパッケージ指定にバージョンを付けず、個別のバージョンを選ぶと固定します。取得に使ったバージョンはどちらの場合もコメントに記録します。
+2. `imports:` (チェックボックス 複数選択可)
+    - AyaExpTech Arcaneが提供しているモジュール・クラスのうち、どれをコピペするかを指定します。
+    - 選択肢は、選択したバージョンの `mod.ts` から **自動取得** され、辞書順に表示されます。
+    - スペースキーで選択を切り替え、Enterで確定します。検索機能はありません。
+    - 何も選択せずに確定した場合、クリップボードを変更せず正常終了します。
+3. `output:` (単一選択)
+    - `TypeScript` (デフォルト): 従来どおりTypeScriptソースをコピーします。
+    - `JavaScript (strip types)`: Sucraseで型を除去してコピーします。minifyや古いJavaScript実行環境向けの構文変換は行いません。
 
-上記のすべての質問に回答し終わると、クリップボードに (2) で選択した export の TypeScript ソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、`export` キーワードは付きません（JSDoc は保持されます）。
+上記のすべての質問に回答し終わると、クリップボードに (2) で選択した export のソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、`export` キーワードは付きません（JSDoc は保持されます）。
 
 > [!NOTE]
 > (2) で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のコードも自動的に含まれます（例: `ModOps` を選ぶと `ExtendedMath` も含まれる）。
 >
 > 同一ソースファイルに複数の export がある場合、選択した export のみが含まれます（例: `BinaryHeap` のみを選んだとき `BinaryHeapLite` は含まれません）。依存先のファイルでも、実際に参照されている export だけが残ります（例: `TwoSAT` を選んでも `UndirectedGraph` は含まれません）。
 
-なお、以下のような場合はクリップボードへのコピーは行われず、エラーメッセージを出したうえで実行が異常終了します。
+JSRから必要な情報やソースを取得できない場合はエラーで終了します。export一覧の取得に失敗した場合は、従来どおり組み込みの候補一覧を表示します。Ctrl+Cで質問を中断できます。
 
-- (1) で指定したバージョンが AyaExpTech Arcane に存在しない
+## Development
+
+```sh
+npm run check        # 型チェック
+npm test             # Node.jsでテスト
+npm run test:bun     # Bunで同じテスト
+npm run build        # dist/cli.js (ES Module) を生成
+npm pack             # axt-arcane-bundler-0.0.0.tgz を生成 (ビルドも自動実行)
+```
+
+配布物の動作確認は、Linux上でNode.jsとBunを用意して以下を実行します。JSRとクリップボードはテスト用のものを使い、実際のクリップボードは変更しません。
+
+```sh
+npm run test:package -- ./axt-arcane-bundler-0.0.0.tgz
+```
 
 ## Building standalone binaries
 
-Deno が入っている環境で、macOS (Apple Silicon)・Windows・Linux 向けのバイナリをまとめてビルドできます。
+Bunと開発用の依存が入っている環境で、macOS (Apple Silicon)・Windows・Linux 向けのバイナリをまとめてビルドできます。
 
 ```sh
-deno task compile
+npm run compile
 ```
 
 成果物は `dist/` に出力されます。
@@ -96,20 +118,21 @@ deno task compile
 .\dist\axt-arcane-bundler-x86_64-pc-windows-msvc.exe
 ```
 
-ビルド時に `--allow-net`・`--allow-read`・`--allow-run`・`--allow-env` がバイナリへ埋め込まれるため、実行時に権限フラグは不要です。実行時も JSR からソースを取得するため、ネットワーク接続が必要です。
-
-テストは `deno task test` で実行できます。
+Bunの `build --compile` で生成します。実行時にNode.js・Bunのインストールや権限フラグは不要ですが、JSRへのネットワーク接続は必要です。単体バイナリは手動ビルド用で、Releaseに自動添付するのはtgzです。
 
 クリップボード連携: macOS は `pbcopy`、Windows は `clip`、Linux は `wl-copy` / `xclip` / `xsel`（いずれかが PATH にある場合）を使用します。
 
 ## Releasing
 
-JSR への公開は GitHub Actions で行います。初回のみ、[JSR のパッケージ設定](https://jsr.io/@axt-ayakoto/axt-arcane-bundler/settings) でこの GitHub リポジトリを Link してください。
+GitHub Releasesへのtgzの添付はGitHub Actionsで行います。
 
-1. 変更を `main` に merge する
-2. GitHub で Release を作成し **新規** の `vX.Y.Z` タグを付ける、または `git tag vX.Y.Z && git push origin vX.Y.Z` する
-3. [Publish to JSR](.github/workflows/publish.yml) ワークフローが走り、[JSR](https://jsr.io/@axt-ayakoto/axt-arcane-bundler) に反映される
+1. 変更を `main` にmergeする
+2. GitHubでReleaseを作成し、対象コミットに `vX.Y.Z` または `vX.Y.Z-alpha.N` などのタグを付けて **Publish release** を押す
+3. [Build Release package](.github/workflows/publish.yml) がタグのコミットをcheckoutし、型チェック・テスト・ビルド・梱包・Node.js/Bunでの配布物検証を行う
+4. 同じReleaseのAssetsに `axt-arcane-bundler-X.Y.Z.tgz` が添付される
 
-リリース前の手動確認: GitHub Actions → **Publish to JSR** → **Run workflow** → `tag_name` に例 `v0.1.0`、`dry_run` をオンにして実行する。
+下書きの保存やタグのpushだけでは起動しません。プレリリースの公開も対象です。Release公開からAsset添付まではビルド時間がかかります。
 
-リポジトリ上の [`jsr.json`](jsr.json) の `version` は常に `0.0.0` のままです。CI がタグから semver を読み取り、publish 時だけ差し替えます。
+手動確認はGitHub Actions → **Build Release package** → **Run workflow** から行えます。`tag_name` に既存のタグを指定し、`dry_run` をオンにすると、Releaseには添付せずActionsのArtifactにtgzを保存します。オフにすると、指定した既存Releaseに添付します。再実行時は同名Assetを置き換えます。
+
+リポジトリ上の `package.json`・`package-lock.json` のバージョンは `0.0.0` のままです。CIがタグからSemVerを読み取り、ビルド時だけ差し替えます。npmレジストリや、このツールの旧JSRパッケージには公開しません。Arcaneの取得元は引き続きJSRです。

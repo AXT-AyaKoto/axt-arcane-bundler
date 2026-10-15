@@ -1,3 +1,5 @@
-.deno/
+node_modules/
 dist/
+.artifacts/
+*.tgz
 .DS_Store

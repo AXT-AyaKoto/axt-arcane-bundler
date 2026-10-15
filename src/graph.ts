@@ -122,10 +122,9 @@ export async function resolveModuleGraph(
   for (const name of selection.selectedExports) {
     const modulePath = exportMap.get(name);
     if (!modulePath) {
-      console.error(
+      throw new Error(
         `Error: Export "${name}" is not provided by @ayaexptech/arcane@${version}.`,
       );
-      Deno.exit(1);
     }
     startPaths.push(normalizePackagePath(modulePath));
   }
@@ -136,8 +135,7 @@ export async function resolveModuleGraph(
   );
 
   if (srcPaths.size === 0) {
-    console.error("Error: No Arcane source modules were resolved for bundling.");
-    Deno.exit(1);
+    throw new Error("Error: No Arcane source modules were resolved for bundling.");
   }
 
   return topologicalSortPaths(srcPaths, version);

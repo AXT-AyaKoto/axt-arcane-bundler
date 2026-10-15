@@ -1,5 +1,12 @@
 import { runWizard } from "./src/main.ts";
 
-if (import.meta.main) {
+try {
   await runWizard();
+} catch (error) {
+  if (error instanceof Error && error.name === "ExitPromptError") {
+    process.exitCode = 0;
+  } else {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
 }

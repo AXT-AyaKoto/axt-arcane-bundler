@@ -1,4 +1,4 @@
-import { compare, parse } from "@std/semver";
+import { rcompare, valid } from "semver";
 import {
   arcaneSpecifier,
   ARCANE_PACKAGE,
@@ -30,20 +30,16 @@ export async function fetchPackageMeta(): Promise<JsrPackageMeta> {
   return (await response.json()) as JsrPackageMeta;
 }
 
-export function maxPublishedVersion(
-  versions: Record<string, unknown>,
-): string {
-  const keys = Object.keys(versions);
+function publishedVersions(versions: Record<string, unknown>): string[] {
+  const keys = Object.keys(versions).filter((version) => valid(version));
   if (keys.length === 0) {
     throw new Error("No published versions found for AyaExpTech Arcane on JSR.");
   }
-  return keys.reduce((best, current) => {
-    const a = parse(best);
-    const b = parse(current);
-    if (!a) return current;
-    if (!b) return best;
-    return compare(b, a) > 0 ? current : best;
-  });
+  return keys.sort(rcompare);
+}
+
+export function maxPublishedVersion(versions: Record<string, unknown>): string {
+  return publishedVersions(versions)[0];
 }
 
 export function defaultFetchVersion(meta: JsrPackageMeta): string {
@@ -56,13 +52,10 @@ export function validateVersionExists(
   version: string,
 ): void {
   if (!(version in meta.versions)) {
-    console.error(
-      `Error: Version "${version}" does not exist for ${ARCANE_PACKAGE} on JSR.`,
+    throw new Error(
+      `Error: Version "${version}" does not exist for ${ARCANE_PACKAGE} on JSR.\n` +
+        `Published versions: ${Object.keys(meta.versions).sort().join(", ")}`,
     );
-    console.error(
-      `Published versions: ${Object.keys(meta.versions).sort().join(", ")}`,
-    );
-    Deno.exit(1);
   }
 }
 
@@ -89,10 +82,11 @@ export function resolveArcane(
   };
 }
 
-export function versionHint(meta: JsrPackageMeta): string {
-  const v = defaultFetchVersion(meta);
-  if (meta.latest) {
-    return `(empty = latest stable ${meta.latest})`;
-  }
-  return `(empty = ${v}; no stable release on JSR yet)`;
+export function versionChoices(meta: JsrPackageMeta): { name: string; value: string }[] {
+  // With no stable release, the newest published prerelease is the first choice.
+  const versions = publishedVersions(meta.versions);
+  return [
+    ...(meta.latest ? [{ name: `Latest stable (${meta.latest})`, value: "" }] : []),
+    ...versions.map((version) => ({ name: version, value: version })),
+  ];
 }

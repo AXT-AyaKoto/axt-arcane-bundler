@@ -1,12 +1,17 @@
-import { bgGreen, black } from "@std/fmt/colors";
+import colors from "picocolors";
 import { copyToClipboard } from "./clipboard.ts";
 import { fetchExportsByPath } from "./exports.ts";
 import { resolveModuleGraph } from "./graph.ts";
 import { mergeTypeScriptSources } from "./merge.ts";
-import { runPrompts } from "./wizard.ts";
+import { formatOutput } from "./output.ts";
+import { runPrompts, type PromptContext } from "./wizard.ts";
 
-export async function runWizard(): Promise<void> {
-  const selection = await runPrompts();
+export async function runWizard(context?: PromptContext): Promise<void> {
+  const selection = await runPrompts(context);
+  if (selection.selectedExports.length === 0) {
+    console.log("No exports selected. Nothing copied.");
+    return;
+  }
   const version = selection.resolved.fetchVersion;
   const exportsByPath = await fetchExportsByPath(version);
   const paths = await resolveModuleGraph(selection);
@@ -17,8 +22,8 @@ export async function runWizard(): Promise<void> {
     selection.resolved.specifier,
     exportsByPath,
   );
-  await copyToClipboard(merged);
+  await copyToClipboard(formatOutput(merged, selection.outputFormat));
   const message =
     `Copied ${paths.length} module(s) to the clipboard (${selection.selectedExports.length} export(s) selected).`;
-  console.log(bgGreen(black(message)));
+  console.log(colors.bgGreen(colors.black(message)));
 }
