@@ -14,7 +14,7 @@ This is released under [the MIT License](./LICENSE).
 
 > [!NOTE]
 > このツールは、そのほとんどがAIによって実装された、いわゆるVibe-Codingプロダクトです。  
-> AIへの指示を行った私(綾坂こと)がDogfoodingを行っているためある程度品質については保証しますが、Vibe-Codingによるプロダクトであることには留意してください。  
+> AIへの指示を行った私(綾坂こと)がDogfoodingを行っているためある程度品質については保証しますが、Vibe-Codingによるプロダクトであることには留意してください。
 
 ## How to Use
 
@@ -30,8 +30,8 @@ TypeScriptでコピーする他に、JavaScriptにType Strippingしてコピー�
 
 ### GitHub Releasesから利用
 
-- Node.js・pnpmの場合: `pnpm dlx https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz`
-- Bunの場合: `bunx --bun axt-arcane-bundler@https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz`
+- Node.js・pnpmの場合: `pnpm dlx https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v2.0.0/axt-arcane-bundler-2.0.0.tgz`
+- Bunの場合: `bunx --bun axt-arcane-bundler@https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v2.0.0/axt-arcane-bundler-2.0.0.tgz`
 
 バージョン番号(URL内2箇所)は適宜置き換えてください。
 

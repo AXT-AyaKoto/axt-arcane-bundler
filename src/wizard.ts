@@ -29,25 +29,26 @@ export async function runPrompts(context?: PromptContext): Promise<WizardSelecti
         {
             message: "imports:",
             choices: exportNames,
+            loop: false,
             required: false,
         },
         context,
     );
 
-    const outputFormat =
-        selectedExports.length === 0
-            ? "typescript"
-            : await select<OutputFormat>(
-                  {
-                      message: "output:",
-                      choices: [
-                          { name: "TypeScript", value: "typescript" },
-                          { name: "JavaScript (strip types)", value: "javascript" },
-                      ],
-                      default: "typescript",
-                  },
-                  context,
-              );
+    const outputFormat = await (async () => {
+        if (selectedExports.length === 0) return "typescript";
+        return select<OutputFormat>(
+            {
+                message: "output:",
+                choices: [
+                    { name: "TypeScript", value: "typescript" },
+                    { name: "JavaScript (strip types)", value: "javascript" },
+                ],
+                default: "typescript",
+            },
+            context,
+        );
+    })();
 
     return { resolved, selectedExports, outputFormat };
 }

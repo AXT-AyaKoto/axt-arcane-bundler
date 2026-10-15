@@ -12,11 +12,9 @@ export async function mergeTypeScriptSources(
     exportsByPath: Map<string, string[]>,
 ): Promise<string> {
     const parts: string[] = [
-        "// ======== Copied from AyaExpTech Arcane ========",
-        `// Using: AXT-AyaKoto/axt-arcane-bundler (https://github.com/AXT-AyaKoto/axt-arcane-bundler)`,
-        `// Package: ${specifier}`,
-        `// Resolved version (sources): ${fetchVersion}`,
-        `// Selected exports: ${selectedExports.join(", ")}`,
+        `// ======== Copied from "AyaExpTech Arcane" (using "AXT-AyaKoto/axt-arcane-bundler") ========`,
+        `// https://jsr.io/@ayaexptech/arcane / https://github.com/AXT-AyaKoto/axt-arcane-bundler`,
+        `// Package: ${specifier} (ver:${fetchVersion}) / Selected Exports: ${selectedExports.join(", ")}`,
         "",
     ];
 
@@ -40,7 +38,7 @@ export async function mergeTypeScriptSources(
         }
     }
 
-    parts.push("// ======== Copied from AyaExpTech Arcane (End) ========");
+    parts.push(`// ======== Copied from "AyaExpTech Arcane" (using "AXT-AyaKoto/axt-arcane-bundler") - End ========`);
 
     const merged = parts.join("\n").trimEnd() + "\n";
     return normalizeBlankLines(merged);
