@@ -19,7 +19,7 @@ This is released under [the MIT License](./LICENSE).
 Node.js 22.13以降の22系、または24以降をインストールしたうえで、以下のコマンドでウィザードを起動します。`v1.0.0`・`1.0.0` は使用するリリースに置き換えてください。
 
 ```sh
-npx --yes https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz
+pnpm dlx https://github.com/AXT-AyaKoto/axt-arcane-bundler/releases/download/v1.0.0/axt-arcane-bundler-1.0.0.tgz
 ```
 
 Bunの現行安定版でも実行できます。`--bun` を指定すると、Node.jsではなくBunで実行します。
@@ -70,17 +70,17 @@ JSRから必要な情報やソースを取得できない場合はエラーで�
 ## Development
 
 ```sh
-npm run check        # 型チェック
-npm test             # Node.jsでテスト
-npm run test:bun     # Bunで同じテスト
-npm run build        # dist/cli.js (ES Module) を生成
-npm pack             # axt-arcane-bundler-0.0.0.tgz を生成 (ビルドも自動実行)
+pnpm run check        # 型チェック
+pnpm test             # Node.jsでテスト
+pnpm run test:bun     # Bunで同じテスト
+pnpm run build        # dist/cli.js (ES Module) を生成
+pnpm pack             # axt-arcane-bundler-0.0.0.tgz を生成 (ビルドも自動実行)
 ```
 
 配布物の動作確認は、Linux上でNode.jsとBunを用意して以下を実行します。JSRとクリップボードはテスト用のものを使い、実際のクリップボードは変更しません。
 
 ```sh
-npm run test:package -- ./axt-arcane-bundler-0.0.0.tgz
+pnpm run test:package -- ./axt-arcane-bundler-0.0.0.tgz
 ```
 
 ## Building standalone binaries
@@ -88,7 +88,7 @@ npm run test:package -- ./axt-arcane-bundler-0.0.0.tgz
 Bunと開発用の依存が入っている環境で、macOS (Apple Silicon)・Windows・Linux 向けのバイナリをまとめてビルドできます。
 
 ```sh
-npm run compile
+pnpm run compile
 ```
 
 成果物は `dist/` に出力されます。
