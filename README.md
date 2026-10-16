@@ -11,6 +11,11 @@
 2026- (c) Ayasaka-Koto.  
 This is released under [the MIT License](./LICENSE).
 
+> [!NOTE]
+> このツールは、そのほとんどがAIによって実装された、いわゆるVibe-Codingプロダクトです。  
+> AIへの指示を行った私(綾坂こと)自身が使用しているためある程度品質については保証しますが、Vibe-Codingによるプロダクトであることには留意してください。  
+> なお、使用モデルはClaude Opus 5.5で、Claude Codeを利用しています。
+
 ## How to Use
 
 実行には以下のいずれかが必要です。また、実行時はネットワーク接続が必要です。
@@ -35,8 +40,8 @@ bunx github:AXT-AyaKoto/axt-arcane-bundler
 > [!TIP]
 > 実行バージョンを固定したい場合は、末尾に `#` とタグ名を付けます。
 > ```sh
-> pnpm dlx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0-RC2
-> bunx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0-RC2
+> pnpm dlx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0
+> bunx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0
 > ```
 
 > [!NOTE]
