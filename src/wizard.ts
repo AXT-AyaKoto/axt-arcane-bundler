@@ -35,6 +35,7 @@ export async function runPrompts(): Promise<WizardSelection> {
     choices: exportNames,
     required: true,
     pageSize: 15,
+    loop: false,
   });
 
   const language = await select<OutputLanguage>({

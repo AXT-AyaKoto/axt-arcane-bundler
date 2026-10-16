@@ -1,6 +1,6 @@
 {
   "name": "axt-arcane-bundler",
-  "version": "0.5.0-RC1",
+  "version": "0.5.0-RC2",
   "description": "Copy selected AyaExpTech Arcane sources and their dependencies to the clipboard.",
   "license": "MIT",
   "repository": "github:AXT-AyaKoto/axt-arcane-bundler",

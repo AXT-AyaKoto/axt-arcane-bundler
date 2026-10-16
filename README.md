@@ -35,8 +35,8 @@ bunx github:AXT-AyaKoto/axt-arcane-bundler
 > [!TIP]
 > 実行バージョンを固定したい場合は、末尾に `#` とタグ名を付けます。
 > ```sh
-> pnpm dlx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0-RC1
-> bunx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0-RC1
+> pnpm dlx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0-RC2
+> bunx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0-RC2
 > ```
 
 > [!NOTE]
