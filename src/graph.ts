@@ -1,4 +1,5 @@
 import { ARCANE_NAME, ARCANE_SCOPE, jsrFileUrl } from "./constants.ts";
+import { UserError } from "./errors.ts";
 import { fetchExportMap } from "./exports.ts";
 import { normalizePackagePath, resolveRelativePath } from "./path.ts";
 import type { WizardSelection } from "./wizard.ts";
@@ -122,10 +123,9 @@ export async function resolveModuleGraph(
   for (const name of selection.selectedExports) {
     const modulePath = exportMap.get(name);
     if (!modulePath) {
-      console.error(
-        `Error: Export "${name}" is not provided by @ayaexptech/arcane@${version}.`,
+      throw new UserError(
+        `Export "${name}" is not provided by @ayaexptech/arcane@${version}.`,
       );
-      Deno.exit(1);
     }
     startPaths.push(normalizePackagePath(modulePath));
   }
@@ -136,8 +136,7 @@ export async function resolveModuleGraph(
   );
 
   if (srcPaths.size === 0) {
-    console.error("Error: No Arcane source modules were resolved for bundling.");
-    Deno.exit(1);
+    throw new UserError("No Arcane source modules were resolved for bundling.");
   }
 
   return topologicalSortPaths(srcPaths, version);

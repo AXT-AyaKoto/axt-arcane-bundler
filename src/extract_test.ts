@@ -1,4 +1,5 @@
-import { assertEquals, assertFalse, assertStringIncludes } from "@std/assert";
+import assert from "node:assert/strict";
+import { test } from "node:test";
 import {
   extractFromSource,
   resolveExportsToExtract,
@@ -50,31 +51,31 @@ export class Documented {
 }
 `;
 
-Deno.test("extractFromSource includes only selected export from multi-export file", () => {
+test("extractFromSource includes only selected export from multi-export file", () => {
   const out = extractFromSource(TWO_CLASS_FILE, "two.ts", new Set(["Alpha"]));
-  assertStringIncludes(out, "class Alpha");
-  assertFalse(out.includes("class Beta"));
-  assertStringIncludes(out, "First class docs");
+  assert.ok(out.includes("class Alpha"));
+  assert.ok(!out.includes("class Beta"));
+  assert.ok(out.includes("First class docs"));
 });
 
-Deno.test("extractFromSource strips export keyword", () => {
+test("extractFromSource strips export keyword", () => {
   const out = extractFromSource(TWO_CLASS_FILE, "two.ts", new Set(["Alpha"]));
-  assertFalse(out.includes("export class"));
-  assertStringIncludes(out, "class Alpha");
+  assert.ok(!out.includes("export class"));
+  assert.ok(out.includes("class Alpha"));
 });
 
-Deno.test("extractFromSource does not leave space before class after export removal", () => {
+test("extractFromSource does not leave space before class after export removal", () => {
   const out = extractFromSource(TWO_CLASS_FILE, "two.ts", new Set(["Alpha"]));
-  assertFalse(out.includes(" class Alpha"));
-  assertStringIncludes(out, "*/\nclass Alpha");
+  assert.ok(!out.includes(" class Alpha"));
+  assert.ok(out.includes("*/\nclass Alpha"));
 });
 
-Deno.test("extractFromSource includes non-export intra-file dependencies", () => {
+test("extractFromSource includes non-export intra-file dependencies", () => {
   const out = extractFromSource(WITH_PRIVATE_HELPER, "worker.ts", new Set([
     "Worker",
   ]));
-  assertStringIncludes(out, "const helper");
-  assertStringIncludes(out, "class Worker");
+  assert.ok(out.includes("const helper"));
+  assert.ok(out.includes("class Worker"));
 });
 
 const WITH_EXPORTED_TYPE_DEP = `export type CSRGraph = {
@@ -117,51 +118,51 @@ export class Graph {
 }
 `;
 
-Deno.test("extractFromSource includes exported type deps used by selected export", () => {
+test("extractFromSource includes exported type deps used by selected export", () => {
   const out = extractFromSource(
     WITH_EXPORTED_TYPE_DEP,
     "graphs.ts",
     new Set(["DirectedGraph"]),
   );
-  assertStringIncludes(out, "type CSRGraph");
-  assertStringIncludes(out, "class DirectedGraph");
-  assertFalse(out.includes("class UndirectedGraph"));
-  assertFalse(out.includes("export type"));
-  assertFalse(out.includes("export class"));
+  assert.ok(out.includes("type CSRGraph"));
+  assert.ok(out.includes("class DirectedGraph"));
+  assert.ok(!out.includes("class UndirectedGraph"));
+  assert.ok(!out.includes("export type"));
+  assert.ok(!out.includes("export class"));
 });
 
-Deno.test("extractFromSource includes nested exported type deps", () => {
+test("extractFromSource includes nested exported type deps", () => {
   const out = extractFromSource(
     WITH_NESTED_EXPORTED_TYPES,
     "graphs.ts",
     new Set(["DirectedGraph"]),
   );
-  assertStringIncludes(out, "type Edge");
-  assertStringIncludes(out, "type CSRGraph");
-  assertStringIncludes(out, "class DirectedGraph");
+  assert.ok(out.includes("type Edge"));
+  assert.ok(out.includes("type CSRGraph"));
+  assert.ok(out.includes("class DirectedGraph"));
   // Source order: Edge, CSRGraph, DirectedGraph
-  assertEquals(out.indexOf("type Edge") < out.indexOf("type CSRGraph"), true);
-  assertEquals(
+  assert.deepEqual(out.indexOf("type Edge") < out.indexOf("type CSRGraph"), true);
+  assert.deepEqual(
     out.indexOf("type CSRGraph") < out.indexOf("class DirectedGraph"),
     true,
   );
 });
 
-Deno.test("extractFromSource includes exported interface deps", () => {
+test("extractFromSource includes exported interface deps", () => {
   const out = extractFromSource(
     WITH_EXPORTED_INTERFACE_DEP,
     "graph.ts",
     new Set(["Graph"]),
   );
-  assertStringIncludes(out, "interface Node");
-  assertStringIncludes(out, "class Graph");
-  assertFalse(out.includes("export "));
+  assert.ok(out.includes("interface Node"));
+  assert.ok(out.includes("class Graph"));
+  assert.ok(!out.includes("export "));
 });
 
-Deno.test("extractFromSource preserves JSDoc and omits section banners", () => {
+test("extractFromSource preserves JSDoc and omits section banners", () => {
   const out = extractFromSource(WITH_BANNER, "doc.ts", new Set(["Documented"]));
-  assertEquals(out.trimStart().startsWith("/**"), true);
-  assertFalse(out.includes("===="));
+  assert.deepEqual(out.trimStart().startsWith("/**"), true);
+  assert.ok(!out.includes("===="));
 });
 
 const FILE_A_IMPORTS_KEEP = `import { Keep } from "./b.ts";
@@ -229,16 +230,16 @@ export class A {
 }
 `;
 
-Deno.test("resolveExportsToExtract keeps only selected export in its own file", () => {
+test("resolveExportsToExtract keeps only selected export in its own file", () => {
   const sources = new Map([
     ["/src/two.ts", TWO_CLASS_FILE],
   ]);
   const byPath = new Map([["/src/two.ts", ["Alpha", "Beta"]]]);
   const names = resolveExportsToExtract(sources, ["Alpha"], byPath);
-  assertEquals(names.get("/src/two.ts"), new Set(["Alpha"]));
+  assert.deepEqual(names.get("/src/two.ts"), new Set(["Alpha"]));
 });
 
-Deno.test("resolveExportsToExtract keeps only imported names from a dependency file", () => {
+test("resolveExportsToExtract keeps only imported names from a dependency file", () => {
   const sources = new Map([
     ["/src/a.ts", FILE_A_IMPORTS_KEEP],
     ["/src/b.ts", FILE_B_KEEP_AND_DROP],
@@ -248,21 +249,21 @@ Deno.test("resolveExportsToExtract keeps only imported names from a dependency f
     ["/src/b.ts", ["Keep", "Drop"]],
   ]);
   const names = resolveExportsToExtract(sources, ["A"], byPath);
-  assertEquals(names.get("/src/a.ts"), new Set(["A"]));
-  assertEquals(names.get("/src/b.ts"), new Set(["Keep"]));
+  assert.deepEqual(names.get("/src/a.ts"), new Set(["A"]));
+  assert.deepEqual(names.get("/src/b.ts"), new Set(["Keep"]));
 
   const out = extractFromSource(
     FILE_B_KEEP_AND_DROP,
     "b.ts",
     names.get("/src/b.ts")!,
   );
-  assertStringIncludes(out, "const helper");
-  assertStringIncludes(out, "type KeepMeta");
-  assertStringIncludes(out, "class Keep");
-  assertFalse(out.includes("class Drop"));
+  assert.ok(out.includes("const helper"));
+  assert.ok(out.includes("type KeepMeta"));
+  assert.ok(out.includes("class Keep"));
+  assert.ok(!out.includes("class Drop"));
 });
 
-Deno.test("resolveExportsToExtract follows a chain of named imports", () => {
+test("resolveExportsToExtract follows a chain of named imports", () => {
   const sources = new Map([
     ["/src/a.ts", FILE_A_IMPORTS_FOO],
     ["/src/b.ts", FILE_B_IMPORTS_BAR],
@@ -274,12 +275,12 @@ Deno.test("resolveExportsToExtract follows a chain of named imports", () => {
     ["/src/c.ts", ["Bar", "DropBar"]],
   ]);
   const names = resolveExportsToExtract(sources, ["A"], byPath);
-  assertEquals(names.get("/src/a.ts"), new Set(["A"]));
-  assertEquals(names.get("/src/b.ts"), new Set(["Foo"]));
-  assertEquals(names.get("/src/c.ts"), new Set(["Bar"]));
+  assert.deepEqual(names.get("/src/a.ts"), new Set(["A"]));
+  assert.deepEqual(names.get("/src/b.ts"), new Set(["Foo"]));
+  assert.deepEqual(names.get("/src/c.ts"), new Set(["Bar"]));
 });
 
-Deno.test("resolveExportsToExtract unions selected names with imported names", () => {
+test("resolveExportsToExtract unions selected names with imported names", () => {
   const sources = new Map([
     ["/src/a.ts", FILE_A_IMPORTS_KEEP],
     ["/src/b.ts", FILE_B_KEEP_AND_DROP],
@@ -289,11 +290,11 @@ Deno.test("resolveExportsToExtract unions selected names with imported names", (
     ["/src/b.ts", ["Keep", "Drop"]],
   ]);
   const names = resolveExportsToExtract(sources, ["A", "Drop"], byPath);
-  assertEquals(names.get("/src/a.ts"), new Set(["A"]));
-  assertEquals(names.get("/src/b.ts"), new Set(["Keep", "Drop"]));
+  assert.deepEqual(names.get("/src/a.ts"), new Set(["A"]));
+  assert.deepEqual(names.get("/src/b.ts"), new Set(["Keep", "Drop"]));
 });
 
-Deno.test("resolveExportsToExtract uses original name for aliased imports", () => {
+test("resolveExportsToExtract uses original name for aliased imports", () => {
   const sources = new Map([
     ["/src/a.ts", FILE_A_IMPORTS_KEEP_ALIAS],
     ["/src/b.ts", FILE_B_KEEP_AND_DROP],
@@ -303,5 +304,27 @@ Deno.test("resolveExportsToExtract uses original name for aliased imports", () =
     ["/src/b.ts", ["Keep", "Drop"]],
   ]);
   const names = resolveExportsToExtract(sources, ["A"], byPath);
-  assertEquals(names.get("/src/b.ts"), new Set(["Keep"]));
+  assert.deepEqual(names.get("/src/b.ts"), new Set(["Keep"]));
+});
+
+test("extractFromSource omits type-only declarations and their JSDoc with omitTypeOnly", () => {
+  const out = extractFromSource(
+    WITH_NESTED_EXPORTED_TYPES.replace(
+      "export type CSRGraph",
+      "/**\n * CSR docs.\n */\nexport type CSRGraph",
+    ),
+    "graphs.ts",
+    new Set(["DirectedGraph"]),
+    { omitTypeOnly: true },
+  );
+  assert.ok(!out.includes("type Edge"));
+  assert.ok(!out.includes("type CSRGraph"));
+  assert.ok(!out.includes("CSR docs"));
+  assert.ok(out.includes("class DirectedGraph"));
+});
+
+test("extractFromSource emits a multi-declarator variable statement once", () => {
+  const source = `const a = 1, b = 2;\n\nexport const sum = (): number => a + b;\n`;
+  const out = extractFromSource(source, "vars.ts", new Set(["sum"]));
+  assert.equal(out.split("const a = 1, b = 2;").length - 1, 1);
 });

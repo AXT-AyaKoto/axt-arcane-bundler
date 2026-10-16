@@ -1,56 +1,56 @@
-async function pipeToClipboardCommand(
+import { spawn, spawnSync } from "node:child_process";
+
+function pipeToClipboardCommand(
   command: string,
   args: string[],
   text: string,
 ): Promise<void> {
-  const proc = new Deno.Command(command, {
-    args,
-    stdin: "piped",
-    stdout: "null",
-    stderr: "inherit",
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      stdio: ["pipe", "ignore", "inherit"],
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Failed to copy to clipboard (${command}).`));
+      }
+    });
+    child.stdin.end(text);
   });
-  const child = proc.spawn();
-  const writer = child.stdin.getWriter();
-  await writer.write(new TextEncoder().encode(text));
-  await writer.close();
-  const status = await child.status;
-  if (!status.success) {
-    throw new Error(`Failed to copy to clipboard (${command}).`);
-  }
 }
 
-async function writeToStdoutFallback(text: string): Promise<void> {
+function writeToStdoutFallback(text: string): void {
   console.warn(
     "Warning: No clipboard utility found. Writing bundled source to stdout.",
   );
-  await Deno.stdout.write(new TextEncoder().encode(text));
+  process.stdout.write(text);
+}
+
+function commandExists(command: string): boolean {
+  return spawnSync("which", [command], { stdio: "ignore" }).status === 0;
 }
 
 export async function copyToClipboard(text: string): Promise<void> {
-  if (Deno.build.os === "darwin") {
+  if (process.platform === "darwin") {
     await pipeToClipboardCommand("pbcopy", [], text);
     return;
   }
 
-  if (Deno.build.os === "windows") {
+  if (process.platform === "win32") {
     try {
       await pipeToClipboardCommand("clip", [], text);
       return;
     } catch {
-      await writeToStdoutFallback(text);
+      writeToStdoutFallback(text);
       return;
     }
   }
 
   for (const cmd of ["wl-copy", "xclip", "xsel"]) {
     try {
-      const check = new Deno.Command("which", {
-        args: [cmd],
-        stdout: "null",
-        stderr: "null",
-      });
-      const checkStatus = await check.output();
-      if (!checkStatus.success) continue;
+      if (!commandExists(cmd)) continue;
 
       const args = cmd === "xclip"
         ? ["-selection", "clipboard"]
@@ -65,5 +65,5 @@ export async function copyToClipboard(text: string): Promise<void> {
     }
   }
 
-  await writeToStdoutFallback(text);
+  writeToStdoutFallback(text);
 }

@@ -1,9 +1,10 @@
-import { compare, parse } from "@std/semver";
+import { compare, valid } from "semver";
 import {
   arcaneSpecifier,
   ARCANE_PACKAGE,
   JSR_META_URL,
 } from "./constants.ts";
+import { UserError } from "./errors.ts";
 
 export interface JsrPackageMeta {
   scope: string;
@@ -38,11 +39,9 @@ export function maxPublishedVersion(
     throw new Error("No published versions found for AyaExpTech Arcane on JSR.");
   }
   return keys.reduce((best, current) => {
-    const a = parse(best);
-    const b = parse(current);
-    if (!a) return current;
-    if (!b) return best;
-    return compare(b, a) > 0 ? current : best;
+    if (!valid(best)) return current;
+    if (!valid(current)) return best;
+    return compare(current, best) > 0 ? current : best;
   });
 }
 
@@ -56,13 +55,10 @@ export function validateVersionExists(
   version: string,
 ): void {
   if (!(version in meta.versions)) {
-    console.error(
-      `Error: Version "${version}" does not exist for ${ARCANE_PACKAGE} on JSR.`,
+    throw new UserError(
+      `Version "${version}" does not exist for ${ARCANE_PACKAGE} on JSR.\n` +
+        `Published versions: ${Object.keys(meta.versions).sort().join(", ")}`,
     );
-    console.error(
-      `Published versions: ${Object.keys(meta.versions).sort().join(", ")}`,
-    );
-    Deno.exit(1);
   }
 }
 

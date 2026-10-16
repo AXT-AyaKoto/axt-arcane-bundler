@@ -6,40 +6,55 @@
 > - GitHub: https://github.com/AXT-Studio/Arcane
 > - JSR: https://jsr.io/@ayaexptech/arcane
 
-> このツール (axt-arcane-bundler)
-> - JSR: https://jsr.io/@axt-ayakoto/axt-arcane-bundler
-
 ## License
 
 2026- (c) Ayasaka-Koto.  
 This is released under [the MIT License](./LICENSE).
 
+> [!NOTE]
+> このツールは、そのほとんどがAIによって実装された、いわゆるVibe-Codingプロダクトです。  
+> AIへの指示を行った私(綾坂こと)自身が使用しているためある程度品質については保証しますが、Vibe-Codingによるプロダクトであることには留意してください。  
+> なお、使用モデルはClaude Opus 5.5で、Claude Codeを利用しています。
+
 ## How to Use
 
-### JSRから直接利用する (推奨)
+実行には以下のいずれかが必要です。また、実行時はネットワーク接続が必要です。
 
-事前にDenoをインストールしたうえで、以下のコマンドでウィザードを起動します。
+- Node.js (22.18以降) と pnpm
+- Bun
+
+### GitHubリポジトリから直接利用する (推奨)
+
+以下のいずれかのコマンドでウィザードを起動します。
 
 ```sh
-deno run -A jsr:@axt-ayakoto/axt-arcane-bundler
+# Node.js + pnpm
+pnpm dlx github:AXT-AyaKoto/axt-arcane-bundler
+```
+
+```sh
+# Bun
+bunx github:AXT-AyaKoto/axt-arcane-bundler
 ```
 
 > [!TIP]
-> 実行バージョンを固定したい場合は、以下のようなコマンドを使用することができます。
+> 実行バージョンを固定したい場合は、末尾に `#` とタグ名を付けます。
 > ```sh
-> deno run -A jsr:@axt-ayakoto/axt-arcane-bundler@1.0.0
+> pnpm dlx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0
+> bunx github:AXT-AyaKoto/axt-arcane-bundler#v0.5.0
 > ```
+
+> [!NOTE]
+> `bunx` は、Node.js がインストールされている環境では Node.js で実行します。Bun だけで実行したい場合は `bunx --bun github:AXT-AyaKoto/axt-arcane-bundler` としてください。
 
 ### リポジトリをクローンして利用する (開発用)
 
-事前にDenoをインストールし、リポジトリをクローンしたうえで、以下のいずれかのコマンドでウィザードを起動します。
+リポジトリをクローンしたうえで、以下のコマンドでウィザードを起動します。
 
 ```sh
-deno run ./exec.ts --allow-net --allow-read --allow-run --allow-env
-```
-
-```sh
-deno task start
+pnpm install
+pnpm start      # Node.jsで実行
+pnpm start:bun  # Bunで実行
 ```
 
 ### ウィザードの使用方法
@@ -54,9 +69,12 @@ deno task start
 2. `imports: ` (チェックボックス 複数選択可)
     - AyaExpTech Arcane が提供しているモジュール・クラスのうち、どれをコピペするかを指定します。
     - 選択肢は、指定（または解決）したバージョンの `mod.ts` から **自動取得** され、辞書順に表示されます。
-    - 複数選択も可能です。また、1つ以上選択する必要があります。
+    - スペースキーで選択し、Enterキーで確定します。複数選択も可能です。また、1つ以上選択する必要があります。
+3. `language: ` (選択式)
+    - コピーするコードの言語を `TypeScript`（デフォルト）と `JavaScript (type-stripped)` から選びます。
+    - `JavaScript (type-stripped)` を選ぶと、[Sucrase](https://github.com/alangpierce/sucrase) で型注釈などの TypeScript 固有の構文だけを取り除いたコードがコピーされます（それ以外の構文は変換しません）。`type` / `interface` 宣言は JSDoc ごと取り除かれます。
 
-上記のすべての質問に回答し終わると、クリップボードに (2) で選択した export の TypeScript ソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、`export` キーワードは付きません（JSDoc は保持されます）。
+上記のすべての質問に回答し終わると、クリップボードに (2) で選択した export のソース（依存分を含む）がコピーされ、実行が終了します。出力はコピペ先に貼り付ける想定のため、`export` キーワードは付きません（JSDoc は保持されます）。
 
 > [!NOTE]
 > (2) で選択したモジュール・クラスに、他のモジュール・クラスに依存するものが含まれる場合、依存先のコードも自動的に含まれます（例: `ModOps` を選ぶと `ExtendedMath` も含まれる）。
@@ -67,49 +85,29 @@ deno task start
 
 - (1) で指定したバージョンが AyaExpTech Arcane に存在しない
 
-## Building standalone binaries
+クリップボード連携: macOS は `pbcopy`、Windows は `clip`、Linux は `wl-copy` / `xclip` / `xsel`（いずれかが PATH にある場合）を使用します。いずれも使えない場合は標準出力に書き出します。
 
-Deno が入っている環境で、macOS (Apple Silicon)・Windows・Linux 向けのバイナリをまとめてビルドできます。
-
-```sh
-deno task compile
-```
-
-成果物は `dist/` に出力されます。
-
-| ファイル | 対象 |
-|----------|------|
-| `dist/axt-arcane-bundler-aarch64-apple-darwin` | macOS (Apple Silicon) |
-| `dist/axt-arcane-bundler-x86_64-pc-windows-msvc.exe` | Windows (x86_64) |
-| `dist/axt-arcane-bundler-x86_64-unknown-linux-gnu` | Linux (x86_64) |
-
-実行例:
+## Development
 
 ```sh
-# macOS
-./dist/axt-arcane-bundler-aarch64-apple-darwin
-
-# Linux
-./dist/axt-arcane-bundler-x86_64-unknown-linux-gnu
-
-# Windows (PowerShell)
-.\dist\axt-arcane-bundler-x86_64-pc-windows-msvc.exe
+pnpm check     # 型チェック
+pnpm test      # Node.jsでテスト
+pnpm test:bun  # Bunでテスト
 ```
 
-ビルド時に `--allow-net`・`--allow-read`・`--allow-run`・`--allow-env` がバイナリへ埋め込まれるため、実行時に権限フラグは不要です。実行時も JSR からソースを取得するため、ネットワーク接続が必要です。
+ビルド工程はありません。`pnpm dlx` / `bunx` は GitHub 上のリポジトリをそのままインストールし、`package.json` の `bin` が指す [`bin/axt-arcane-bundler.js`](bin/axt-arcane-bundler.js) を実行します。このスクリプトは `src/cli.ts` を直接読み込みます。
 
-テストは `deno task test` で実行できます。
+- Bun は TypeScript をそのまま実行できるため、何もせずに読み込みます。
+- Node.js は `node_modules` 配下のファイルの型除去 (Type Stripping) を行わないため、`module.registerHooks` で `src/` 内の `.ts` を TypeScript コンパイラ (`typescript` パッケージ、AST 解析用の依存を流用) で変換してから読み込みます。
 
-クリップボード連携: macOS は `pbcopy`、Windows は `clip`、Linux は `wl-copy` / `xclip` / `xsel`（いずれかが PATH にある場合）を使用します。
+> [!WARNING]
+> `package.json` の `scripts` に `prepare`・`install`・`postinstall` などのライフサイクルスクリプトを追加しないでください。pnpm は GitHub 由来のパッケージがこれらを持っていると、セキュリティ上の理由で `pnpm dlx` の実行を拒否します。
 
 ## Releasing
 
-JSR への公開は GitHub Actions で行います。初回のみ、[JSR のパッケージ設定](https://jsr.io/@axt-ayakoto/axt-arcane-bundler/settings) でこの GitHub リポジトリを Link してください。
+npm レジストリや JSR には公開せず、GitHub リポジトリのタグをそのまま配布物として扱います。
 
 1. 変更を `main` に merge する
-2. GitHub で Release を作成し **新規** の `vX.Y.Z` タグを付ける、または `git tag vX.Y.Z && git push origin vX.Y.Z` する
-3. [Publish to JSR](.github/workflows/publish.yml) ワークフローが走り、[JSR](https://jsr.io/@axt-ayakoto/axt-arcane-bundler) に反映される
+2. `git tag vX.Y.Z && git push origin vX.Y.Z` する（または GitHub で Release を作成し、新規の `vX.Y.Z` タグを付ける）
 
-リリース前の手動確認: GitHub Actions → **Publish to JSR** → **Run workflow** → `tag_name` に例 `v0.1.0`、`dry_run` をオンにして実行する。
-
-リポジトリ上の [`jsr.json`](jsr.json) の `version` は常に `0.0.0` のままです。CI がタグから semver を読み取り、publish 時だけ差し替えます。
+タグを付けなくても、`main` に merge した時点で `pnpm dlx github:AXT-AyaKoto/axt-arcane-bundler`（タグ指定なし）の実行内容は更新されます。

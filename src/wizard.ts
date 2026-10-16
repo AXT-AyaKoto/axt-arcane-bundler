@@ -1,5 +1,5 @@
-import { Checkbox } from "jsr:@cliffy/prompt@1.0.0/checkbox";
-import { Input } from "jsr:@cliffy/prompt@1.0.0/input";
+import { checkbox, input, select } from "@inquirer/prompts";
+import type { OutputLanguage } from "./strip.ts";
 import {
   fetchPackageMeta,
   resolveArcane,
@@ -11,13 +11,14 @@ import { listExportNames } from "./exports.ts";
 export interface WizardSelection {
   resolved: ResolvedArcane;
   selectedExports: string[];
+  language: OutputLanguage;
 }
 
 export async function runPrompts(): Promise<WizardSelection> {
   const meta = await fetchPackageMeta();
   const hint = versionHint(meta);
 
-  const versionInput = await Input.prompt({
+  const versionInput = await input({
     message: `version: ${hint}`,
     default: "",
   });
@@ -29,12 +30,22 @@ export async function runPrompts(): Promise<WizardSelection> {
 
   const exportNames = await listExportNames(resolved.fetchVersion);
 
-  const selectedExports = await Checkbox.prompt({
+  const selectedExports = await checkbox({
     message: "imports: ",
-    options: exportNames,
-    minOptions: 1,
-    search: exportNames.length > 10,
-  }) as string[];
+    choices: exportNames,
+    required: true,
+    pageSize: 15,
+    loop: false,
+  });
 
-  return { resolved, selectedExports };
+  const language = await select<OutputLanguage>({
+    message: "language: ",
+    choices: [
+      { name: "TypeScript", value: "typescript" },
+      { name: "JavaScript (type-stripped)", value: "javascript" },
+    ],
+    default: "typescript",
+  });
+
+  return { resolved, selectedExports, language };
 }

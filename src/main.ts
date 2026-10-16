@@ -1,4 +1,4 @@
-import { bgGreen, black } from "@std/fmt/colors";
+import { styleText } from "node:util";
 import { copyToClipboard } from "./clipboard.ts";
 import { fetchExportsByPath } from "./exports.ts";
 import { resolveModuleGraph } from "./graph.ts";
@@ -16,9 +16,10 @@ export async function runWizard(): Promise<void> {
     selection.selectedExports,
     selection.resolved.specifier,
     exportsByPath,
+    selection.language,
   );
   await copyToClipboard(merged);
   const message =
     `Copied ${paths.length} module(s) to the clipboard (${selection.selectedExports.length} export(s) selected).`;
-  console.log(bgGreen(black(message)));
+  console.log(styleText(["bgGreen", "black"], message));
 }

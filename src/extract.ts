@@ -291,6 +291,7 @@ export function extractFromSource(
   source: string,
   fileName: string,
   namesToExtract: Set<string>,
+  options: { omitTypeOnly?: boolean } = {},
 ): string {
   const { sf, tops, intraFile } = analyzeSource(
     source,
@@ -300,13 +301,27 @@ export function extractFromSource(
 
   // Emit in source order: intra-file deps (private or exported) then selected exports.
   const parts: string[] = [];
+  const emitted = new Set<ts.Node>();
   for (const t of tops) {
+    if (emitted.has(t.node)) continue;
+    if (options.omitTypeOnly && isTypeOnlyDeclaration(t.node)) continue;
     if (intraFile.has(t.name) || (t.isExport && namesToExtract.has(t.name))) {
+      emitted.add(t.node);
       parts.push(sliceDeclaration(sf, t.node));
     }
   }
 
   return parts.join("\n\n");
+}
+
+/** Declarations that disappear entirely when types are stripped. */
+function isTypeOnlyDeclaration(node: ts.Node): boolean {
+  if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
+    return true;
+  }
+  if (ts.isExportDeclaration(node) && node.isTypeOnly) return true;
+  return ts.canHaveModifiers(node) &&
+    !!node.modifiers?.some((m) => m.kind === ts.SyntaxKind.DeclareKeyword);
 }
 
 export async function fetchPackageSource(
